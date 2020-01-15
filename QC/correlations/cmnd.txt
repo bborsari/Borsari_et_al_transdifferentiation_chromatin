@@ -1,0 +1,38 @@
+#***************
+# CORRELATIONS *
+#***************
+
+#******
+# 1. prepare folder to store results
+mkdir out
+#******
+
+#******
+# 2. create bed file w/ genomic windows - 500 bp, chr1
+/no_backup/rg/bborsari/projects/ERC/human/2018-01-19.chip-nf/Borsari_et_al/bin/create_genomic_windows.py chr1 248956422 500 > chr1.500.bed
+#******
+
+#******
+# 3. create bed file w/ genomic windows - 1 kb, chr1
+/no_backup/rg/bborsari/projects/ERC/human/2018-01-19.chip-nf/Borsari_et_al/bin/create_genomic_windows.py chr1 248956422 1000 > chr1.1000.bed
+#******
+
+#******
+# 4. create bed file w/ genomic windows - 2 kb, chr1
+/no_backup/rg/bborsari/projects/ERC/human/2018-01-19.chip-nf/Borsari_et_al/bin/create_genomic_windows.py chr1 248956422 2000 > chr1.2000.bed
+#******
+
+#******
+# 5. generate list of options for job array
+/no_backup/rg/bborsari/projects/ERC/human/2018-01-19.chip-nf/Borsari_et_al/bin/list.options.py --mark '["H3K4me3", "H3K4me2", "H3K4me1", "H3K27ac", "H3K9ac", "H3K36me3", "H3K27me3", "H3K9me3", "H4K20me1"]' --sample '["H000", "H003", "H006", "H009", "H012", "H018", "H024", "H036", "H048", "H072", "H120", "H168"]' --db '["/no_backup/rg/bborsari/projects/ERC/human/2018-01-19.chip-nf/Borsari_et_al/QC/correlations/chipseq-pipeline.db"]' --Loci '["/no_backup/rg/bborsari/projects/ERC/human/2018-01-19.chip-nf/Borsari_et_al/QC/correlations/chr1.500.bed", "/no_backup/rg/bborsari/projects/ERC/human/2018-01-19.chip-nf/Borsari_et_al/QC/correlations/chr1.1000.bed", "/no_backup/rg/bborsari/projects/ERC/human/2018-01-19.chip-nf/Borsari_et_al/QC/correlations/chr1.2000.bed"]' --Method '["pearson", "spearman"]' --log '["no"]' --window '["500", "1000", "2000"]' --outFolder '["out"]' > out/job.array.options.tsv
+#******
+
+#******
+# 6. compute correlations
+qsub /no_backup/rg/bborsari/projects/ERC/human/2018-01-19.chip-nf/Borsari_et_al/bin/job.array.correlation.chipseq.replicates.sh out/job.array.options.tsv
+#******
+
+#******
+# 7. merge files
+for mark in H3K4me3 H3K4me2 H3K4me1 H3K36me3 H3K27ac H3K9ac H3K27me3 H3K9me3 H4K20me1; do for time in H000 H003 H006 H009 H012 H018 H024 H036 H048 H072 H120 H168; do for window in 500 1000 2000; do for cc in pearson spearman; do cat out/"$time""$mark".chipseq-pipeline.db."$window"."$cc".no.correlation.tsv; done; done; done | sed '1imark\twindow\tcc\tlog\ttime\tvalue' > out/"$mark".cc.tsv; done
+#******
