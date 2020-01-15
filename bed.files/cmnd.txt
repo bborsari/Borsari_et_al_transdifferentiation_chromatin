@@ -1,0 +1,40 @@
+#*******
+# 1. soft link to gtf file used to run grape-nf
+ln -s /nfs/no_backup/rg/projects/ERC/human/rnaseq.grape.pipeline.gencode.v24.2016-04-19/refs/gen24.long.gtf
+#*******
+
+#*******
+# 2. generate bedfile with 0-based coordinates for gene body 
+# of all genes in gencode v24 
+# (long genes used to run grape-nf pipeline)
+awk '$3=="gene"' gen24.long.gtf | cut -d ";" -f1 | awk 'BEGIN{OFS="\t"}{print $1, $4, $5, $10, 0, $7, $10}' | sed 's/\"//g' | awk 'BEGIN{FS=OFS="\t"}{$2=($2-1); print $0}' > gencode.v24.all.genes.gene.body.bed
+#*******
+
+#*******
+# 3. generate bedfile with 0-based coordinates for gene body 
+# of protein_coding genes in gencode v24 (no mitochondrial genes)
+awk '$3=="gene"' gen24.long.gtf > gen24.long.gene.annotation.gtf
+grep -F "protein_coding" gen24.long.gene.annotation.gtf | cut -d ";" -f1 | awk 'BEGIN{OFS="\t"}{print $1, $4, $5, $10, 0, $7, $10}' | sed 's/\"//g' | awk 'BEGIN{FS=OFS="\t"}$1!="chrM"{$2=($2-1); print $0}' > gencode.v24.protein.coding.gene.body.bed
+rm gen24.long.gene.annotation.gtf
+#*******
+
+#*******
+# 4. generate bedfile with 0-based coordinates for
+# non-redundant TSSs of all genes in gencode v24 
+# (long genes used to run grape-nf pipeline)
+/no_backup/rg/bborsari/projects/ERC/human/2018-01-19.chip-nf/Borsari_et_al/bin/non.redundant.TSS.sh gen24.long.gtf > gencode.v24.all.genes.non.redundant.TSS.bed
+#*******
+
+#*******
+# 5. generate bedfile with 0-based coordinates for
+# non-redundant TSSs of protein-coding genes 
+# in gencode v24 (no mitochondrial genes) 
+grep -Ff <(cut -f4 gencode.v24.protein.coding.gene.body.bed) gencode.v24.all.genes.non.redundant.TSS.bed > gencode.v24.protein.coding.non.redundant.TSS.bed
+#*******
+
+#*******
+# 6. generate bedfile with 0-based coordinates for 
+# +-2Kb non-redundant TSSs of protein-coding genes 
+# in gencode v24 (no mitochondrial genes)
+awk 'BEGIN{FS=OFS="\t"}{if ($6=="+"){$3=($2+2001); $2=($2-2000)}else{$2=($3-2001);$3=($3+2000)}; if ($2<0){$2=0}; print $0}' gencode.v24.protein.coding.non.redundant.TSS.bed > gencode.v24.protein.coding.non.redundant.TSS.2Kb.up.down.bed
+#*******
