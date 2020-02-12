@@ -1,0 +1,11 @@
+#******
+# 1. retrieve bedfile with coordinates
+# of gene body for selected 12248 genes 
+grep -Ff <(cat /no_backup/rg/bborsari/projects/ERC/human/2018-01-19.chip-nf/Borsari_et_al/analysis/all.marks/expression/genes.with.min.5.TPM.txt /no_backup/rg/bborsari/projects/ERC/human/2018-01-19.chip-nf/Borsari_et_al/analysis/all.marks/expression/silent.genes.txt) /no_backup/rg/bborsari/projects/ERC/human/2018-01-19.chip-nf/Borsari_et_al/bed.files/gencode.v24.protein.coding.gene.body.bed > gene.body.bed
+#******
+
+#******
+# 2. retrieve bedfile with coordinates
+# of non-redundant TSSs for selected 12248 genes
+grep -Ff <(cat /no_backup/rg/bborsari/projects/ERC/human/2018-01-19.chip-nf/Borsari_et_al/analysis/all.marks/expression/genes.with.min.5.TPM.txt /no_backup/rg/bborsari/projects/ERC/human/2018-01-19.chip-nf/Borsari_et_al/analysis/all.marks/expression/silent.genes.txt) /no_backup/rg/bborsari/projects/ERC/human/2018-01-19.chip-nf/Borsari_et_al/bed.files/gencode.v24.protein.coding.non.redundant.TSS.2Kb.up.down.bed > non.redundant.TSS.2Kb.up.down.bed
+#******
