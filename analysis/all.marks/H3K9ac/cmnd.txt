@@ -1,0 +1,49 @@
+#******
+# 1. prepare folders for logs and errors
+# mkdir -p logs erros
+#******
+
+#******
+# 2. load conda environment
+conda activate ERC_human &&
+#******
+
+#******
+# 3. define bedfile for this mark
+myBed="/no_backup/rg/bborsari/projects/ERC/human/2018-01-19.chip-nf/Borsari_et_al/analysis/all.marks/bed.files/non.redundant.TSS.2Kb.up.down.bed" &&
+#******
+
+#******
+# 4. list pileup bw files
+grep H3K9acX1 /no_backup_isis/rg/projects/ERC/human/chipseq/2018-01-19.chip-nf/chipseq-pipeline.db | grep pileup | sort -k1,1 | cut -f2 > H3K9ac.R1.pileup.bw.txt &&
+grep H3K9acX2 /no_backup_isis/rg/projects/ERC/human/chipseq/2018-01-19.chip-nf/chipseq-pipeline.db | grep pileup | sort -k1,1 | cut -f2 > H3K9ac.R2.pileup.bw.txt &&
+#******
+
+#******
+# 5. list Zerone peak calling files
+grep H3K9ac /no_backup_isis/rg/projects/ERC/human/chipseq/2018-01-19.chip-nf/chipseq-pipeline.db | grep erone_merged | sort -k1 | cut -f2 > H3K9ac.Zerone.peaks.txt &&
+#******
+
+#******
+# 6. prepare folder for bwtool analysis
+mkdir bwtool &&
+#******
+
+#******
+# 7. get mark matrix
+
+# 7.1. rep. 1 
+/no_backup/rg/bborsari/projects/ERC/human/2018-01-19.chip-nf/Borsari_et_al/bin/get.matrix.chipseq.sh --bedfile $myBed --bw H3K9ac.R1.pileup.bw.txt --target H3K9ac --outFolder bwtool --signal mean --peaks H3K9ac.Zerone.peaks.txt --keep yes --outFile H3K9ac.R1.matrix.tsv &&
+
+# 7.2. clean-up
+mkdir coordinates.bed &&
+mv *.intersection.bed coordinates.bed/ &&
+rm H3K9ac.path.* &&
+
+# 7.3. rep. 2
+/no_backup/rg/bborsari/projects/ERC/human/2018-01-19.chip-nf/Borsari_et_al/bin/get.matrix.chipseq.sh --bedfile $myBed --bw H3K9ac.R2.pileup.bw.txt --target H3K9ac --outFolder bwtool --signal mean --peaks H3K9ac.Zerone.peaks.txt --keep yes --outFile H3K9ac.R2.matrix.tsv &&
+
+# 7.4. clean-up
+rm *.intersection.bed &&
+rm H3K9ac.path.*
+#*****
