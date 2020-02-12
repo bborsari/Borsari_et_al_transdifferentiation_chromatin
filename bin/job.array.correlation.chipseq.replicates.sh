@@ -3,7 +3,7 @@
 #$ -cwd
 #$ -q rg-el7
 #$ -j y
-#$ -o /no_backup/rg/bborsari/outputs/$JOB_NAME.$TASK_ID.log
+#$ -o /no_backup/rg/bborsari/projects/ERC/human/2018-01-19.chip-nf/Borsari_et_al/QC/logs/$JOB_NAME.$TASK_ID.log
 #$ -t 1-648
 
 input="$1"
@@ -21,4 +21,4 @@ rep1=$(echo "$options" | cut -f9)
 rep2=$(echo "$options" | cut -f10)
 outFile=$(echo "$options" | cut -f11)
 
-/no_backup/rg/bborsari/projects/ERC/human/2018-01-19.chip-nf/bin/correlation.replicates.ChIPseq.sh --mark "$mark" --sample "$sample" --db "$db" --loci "$loci" --method "$method" --log "$log" --window "$window" --type "$type" --rep1 "$rep1" --rep2 "$rep2" > $outFile
+/no_backup/rg/bborsari/projects/ERC/human/2018-01-19.chip-nf/Borsari_et_al/bin/correlation.replicates.ChIPseq.sh --mark "$mark" --sample "$sample" --db "$db" --loci "$loci" --method "$method" --log "$log" --window "$window" --type "$type" --rep1 "$rep1" --rep2 "$rep2" > $outFile

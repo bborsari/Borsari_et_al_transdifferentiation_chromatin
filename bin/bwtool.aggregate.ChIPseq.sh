@@ -144,7 +144,7 @@ cat $bw | while read file; do
 		bwtool aggregate 10000:0 -starts -keep-bed $bedFile $file "$sampleId".bwtool.aggregate.tsv
 
 	else
-		bwtool aggregate 2000:$meta:2000 -keep-bed $bedFile $file "$sampleId".bwtool.aggregate.tsv
+		bwtool aggregate 5000:$meta:5000 -keep-bed $bedFile $file "$sampleId".bwtool.aggregate.tsv
 
 	fi
 	
