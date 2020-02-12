@@ -1,0 +1,57 @@
+#*****
+# 1. merge rep.1 and rep.2
+# paste <(tail -n+2 ../selected.genes.rep.2.tsv) <(tail -n+2 ../selected.genes.rep.3.tsv | cut -f2-) | sed '1igene_id\tH000.2T\tH003.2T\tH006.2T\tH009.2T\tH012.2T\tH018.2T\tH024.2T\tH036.2T\tH048.2T\tH072.2T\tH120.2T\tH168.2T\tH000.3T\tH003.3T\tH006.3T\tH009.3T\tH012.3T\tH018.3T\tH024.3T\tH036.3T\tH048.3T\tH072.3T\tH120.3T\tH168.3T' > selected.genes.rep.2.3.merged.tsv &&
+#*****
+
+#*****
+# 2. run QN on merged matrix
+# ~/software/R-3.5.2/bin/Rscript /no_backup/rg/bborsari/projects/ERC/human/2018-01-19.chip-nf/Borsari_et_al/bin/quantile.normalization.R selected.genes.rep.2.3.merged.tsv > selected.genes.rep.2.3.merged.after.QN.merged.tsv &&
+#*****
+
+#*****
+# 3. split joint matrix into rep. 1 and rep. 2 matrices
+# awk 'BEGIN{FS=OFS="\t"}{if (NR==1){print "gene_id", $0} else {print $0}}' selected.genes.rep.2.3.merged.after.QN.merged.tsv | cut -f-13 | sed '1s/gene_id\t//' > selected.genes.rep.2.after.QN.merged.tsv &&
+# awk 'BEGIN{FS=OFS="\t"}{if (NR==1){print "gene_id", $0} else {print $0}}' selected.genes.rep.2.3.merged.after.QN.merged.tsv | cut -f1,14- | sed '1s/gene_id\t//' > selected.genes.rep.3.after.QN.merged.tsv &&
+#*****
+
+#*****
+# 4. take the average of replicate 1 and 2
+# ~/software/R-3.5.2/bin/Rscript /no_backup/rg/bborsari/projects/ERC/human/2018-01-19.chip-nf/Borsari_et_al/bin/matrix_matrix_mean.R -a selected.genes.rep.2.after.QN.merged.tsv -b selected.genes.rep.3.after.QN.merged.tsv -o selected.genes.rep.2.3.after.QN.merged.tsv -r 2 &&
+# awk 'BEGIN{FS=OFS="\t"}{if (NR==1){for (i=1; i<=NF; i++){split($i, a, "."); $i=a[1]}; print $0} else {print $0}}' selected.genes.rep.2.3.after.QN.merged.tsv > tmp; mv tmp selected.genes.rep.2.3.after.QN.merged.tsv
+#*****
+
+#*****
+# 5. run Ramil's classification (WARNING: run manually because needs to add tmp gene_id to header)
+# /no_backup/rg/bborsari/projects/ERC/human/2018-01-19.chip-nf/Borsari_et_al/bin/classification_LOG2.pl selected.genes.rep.2.3.after.QN.merged.tsv 
+# sed 's/low expression/low_expression/g;s/moderate expression/moderate_expression/g;s/high expression/high_expression/g' selected.genes.rep.2.3.after.QN.merged.tsv.classification > tmp; mv tmp selected.genes.rep.2.3.after.QN.merged.tsv.classification
+#*****
+
+#*****
+# 6. run maSigPro
+~/software/R-3.5.2/bin/Rscript /no_backup/rg/bborsari/projects/ERC/human/2018-01-19.chip-nf/Borsari_et_al/bin/maSigPro.wrapper.R --rep1 selected.genes.rep.2.after.QN.merged.tsv --rep2 selected.genes.rep.3.after.QN.merged.tsv -o expression.QN.merged.maSigPro.out.tsv &&
+#*****
+
+#*****
+# 7. metadata classification
+grep -Ff <(tail -n+2 expression.QN.merged.maSigPro.out.tsv | cut -f1) selected.genes.rep.2.3.after.QN.merged.tsv.classification | sed '1iclass\ttime_point' > metadata.tsv &&
+#*****
+
+#*****
+# 8. final expression matrix
+/no_backup/rg/bborsari/projects/ERC/human/2018-01-19.chip-nf/Borsari_et_al/bin/selectMatrixRows.sh <(tail -n+2 expression.QN.merged.maSigPro.out.tsv | cut -f1) selected.genes.rep.2.3.after.QN.merged.tsv > expression.matrix.tsv &&
+#*****
+
+#*****
+# 9. re-classify genes 
+# that are variable or 
+# with high/moderate/low expression
+# with hierarchical clustering
+~/software/R-3.5.2/bin/Rscript /no_backup/rg/bborsari/projects/ERC/human/2018-01-19.chip-nf/Borsari_et_al/bin/classification2.R &&
+#*****
+
+#*****
+# 10. compare with
+# metadata obtained 
+# w/o silent genes
+~/bin/join.py -a metadata.class2.tsv -b /no_backup/rg/bborsari/projects/ERC/human/2018-01-19.chip-nf/test.options/all.marks.mean/expression/QN.merged/metadata.class2.tsv | cut -f1,4,8 | awk '$2!=$3{print $2"_"$3}' | sort | uniq -c
+#*****

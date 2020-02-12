@@ -1,0 +1,49 @@
+#*******
+# 1. prepare folders for logs and errors
+# mkdir -p logs errors
+#*******
+
+#*******
+# 2. retrieve expression matrices
+# for the two replicates 
+# from Bruna's original matrix
+# for 19831 protein coding genes
+/no_backup/rg/bborsari/projects/ERC/human/2018-01-19.chip-nf/Borsari_et_al/bin/selectColumns.sh ENS_ID:H000.2T:H003.2T:H006.2T:H009.2T:H012.2T:H018.2T:H024.2T:H036.2T:H048.2T:H072.2T:H120.2T:H168.2T proteinCoding_normalized_individualRep_log2TPMpseudo_rnaseq.tsv > proteinCoding_normalized_individualRep_log2TPMpseudo_rnaseq.rep.2.tsv &&
+/no_backup/rg/bborsari/projects/ERC/human/2018-01-19.chip-nf/Borsari_et_al/bin/selectColumns.sh ENS_ID:H000.3T:H003.3T:H006.3T:H009.3T:H012.3T:H018.3T:H024.3T:H036.3T:H048.3T:H072.3T:H120.3T:H168.3T proteinCoding_normalized_individualRep_log2TPMpseudo_rnaseq.tsv > proteinCoding_normalized_individualRep_log2TPMpseudo_rnaseq.rep.3.tsv &&
+#*******
+
+#*******
+# 3. retrieve genes with min. 
+# expression of 5 TPM (log2(TPM+1) >= 2.584963)
+/no_backup/rg/bborsari/projects/ERC/human/2018-01-19.chip-nf/Borsari_et_al/bin/join.py -b <(tail -n+2 proteinCoding_normalized_individualRep_log2TPMpseudo_rnaseq.rep.2.tsv | awk 'BEGIN{FS=OFS="\t"}{for (i=2;i<=NF;i++){print $1"_"(i-1), $i}}') -a <(tail -n+2 proteinCoding_normalized_individualRep_log2TPMpseudo_rnaseq.rep.3.tsv | awk 'BEGIN{FS=OFS="\t"}{for (i=2;i<=NF;i++){print $1"_"(i-1), $i}}') | awk '$2>=2.584963 && $3>=2.584963{split($1, a, "_"); print a[1]}' | sort -u > genes.with.min.5.TPM.txt &&
+#*******
+
+#*******
+# 4. retrieve silent genes
+# aka 0 TPMs in all time points and replicates
+/no_backup/rg/bborsari/projects/ERC/human/2018-01-19.chip-nf/Borsari_et_al/bin/join.py -b <(tail -n+2 proteinCoding_normalized_individualRep_log2TPMpseudo_rnaseq.rep.2.tsv | awk 'BEGIN{FS=OFS="\t"}{for (i=2;i<=NF;i++){print $1"_"(i-1), $i}}') -a <(tail -n+2 proteinCoding_normalized_individualRep_log2TPMpseudo_rnaseq.rep.3.tsv | awk 'BEGIN{FS=OFS="\t"}{for (i=2;i<=NF;i++){print $1"_"(i-1), $i}}') | awk '$2==0 && $3==0{split($1, a, "_"); print a[1]}' | sort | uniq -c | awk '$1==12{print $2}' > silent.genes.txt &&
+#******
+
+#******
+# 5. retrieve expression
+# matrices for the selected 
+# genes (silent & expressed >= 5 TPMs)
+/no_backup/rg/bborsari/projects/ERC/human/2018-01-19.chip-nf/Borsari_et_al/bin/selectMatrixRows.sh <(cat genes.with.min.5.TPM.txt silent.genes.txt) proteinCoding_normalized_individualRep_log2TPMpseudo_rnaseq.rep.2.tsv > selected.genes.rep.2.tsv &&
+/no_backup/rg/bborsari/projects/ERC/human/2018-01-19.chip-nf/Borsari_et_al/bin/selectMatrixRows.sh <(cat genes.with.min.5.TPM.txt silent.genes.txt) proteinCoding_normalized_individualRep_log2TPMpseudo_rnaseq.rep.3.tsv > selected.genes.rep.3.tsv &&
+#*******
+
+#*******
+# 6. prepare folder to store QN.merged 
+# matrices (aka quantile normalization across
+# replicates and time-points)
+mkdir QN.merged &&
+#*******
+
+#*******
+# 7. list bw files
+grep -F "2T" /no_backup/rg/projects/ERC/human/rnaseq.grape.pipeline.gencode.v24.2016-04-19/erc.human.rna.dashboard.tsv | grep bw | grep -v ultiple | grep -v minus | cut -f1,21 | sort -k2 | cut -f1 > expression.R1.unique.plus.bw.txt &&
+grep -F "2T" /no_backup/rg/projects/ERC/human/rnaseq.grape.pipeline.gencode.v24.2016-04-19/erc.human.rna.dashboard.tsv | grep bw | grep -v ultiple | grep -v plus | cut -f1,21 | sort -k2 | cut -f1 > expression.R1.unique.minus.bw.txt &&
+grep -F "3T" /no_backup/rg/projects/ERC/human/rnaseq.grape.pipeline.gencode.v24.2016-04-19/erc.human.rna.dashboard.tsv | grep bw | grep -v ultiple | grep -v minus | cut -f1,21 | sort -k2 | cut -f1 > expression.R2.unique.plus.bw.txt &&
+grep -F "3T" /no_backup/rg/projects/ERC/human/rnaseq.grape.pipeline.gencode.v24.2016-04-19/erc.human.rna.dashboard.tsv | grep bw | grep -v ultiple | grep -v plus | cut -f1,21 | sort -k2 | cut -f1 > expression.R2.unique.minus.bw.txt
+#*******
+
