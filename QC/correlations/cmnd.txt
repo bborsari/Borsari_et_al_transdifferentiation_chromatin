@@ -1,7 +1,3 @@
-#***************
-# CORRELATIONS *
-#***************
-
 #******
 # 1. prepare folder to store results
 mkdir out
@@ -19,7 +15,7 @@ mkdir out
 
 #******
 # 4. create bed file w/ genomic windows - 2 kb, chr1
-/no_backup/rg/bborsari/projects/ERC/human/2018-01-19.chip-nf/Borsari_et_al/bin/create_genomic_windows.py chr1 248956422 2000 > chr1.2000.bed
+/no_backup/rg/bborsari/projects/ERC/human/2018-01-19.chip-nf/Borsari_et_al/bin/create_genomic_windows.py chr1 248956422 2000 > chr1.2000.bed 
 #******
 
 #******
