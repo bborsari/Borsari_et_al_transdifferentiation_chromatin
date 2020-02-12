@@ -1,0 +1,61 @@
+#******
+# 1. prepare folders for expression and 9 histone marks
+mkdir -p expression H3K4me1 H3K4me2 H3K4me3 H3K9ac H3K27ac H3K36me3 H3K9me3 H3K27me3 H4K20me1
+#******
+
+#******
+# 2. prepare folder to store bedfiles for 
+# 10696 genes with expression >= 5 TPMs
+# in at least 1 time-point (both replicates)
+mkdir bed.files
+#******
+
+#******
+# 3. prepare errors and logs folders 
+# for all marks
+for mark in H3K4me1 H3K4me2 H3K4me3 H3K9ac H3K27ac H3K36me3 H3K9me3 H3K27me3 H4K20me1; do mkdir -p "$mark"/logs "$mark"/errors; done
+#******
+
+#******
+# 4. prepare folder to store QN.merged 
+# matrices (aka quantile normalization across
+# replicates and time-points)
+for folder in H3K4me1 H3K4me2 H3K4me3 H3K9ac H3K27ac H3K36me3 H3K9me3 H3K27me3 H4K20me1; do mkdir "$folder"/QN.merged; done
+#******
+
+#******
+# 5. test overlap with old analyses
+# w/ respect to 
+# number of significant genes
+for mark in H3K4me3 H3K4me1 H3K4me2 H3K9ac H3K27ac H3K27me3 H3K36me3 H3K9me3 H4K20me1; do a=$(grep -Ff <(tail -n+2 "$mark"/QN.merged/"$mark".QN.merged.maSigPro.out.tsv | cut -f1 | cut -f1 -d ".") <(tail -n+2 /no_backup/rg/bborsari/projects/ERC/human/2018-01-19.chip-nf/old/analysis/all.marks.3/"$mark"/QN.merged/"$mark".joint.QN.maSigPro.out.tsv | cut -f1 | cut -f1 -d ".") | wc -l); b=$(tail -n+2 "$mark"/QN.merged/"$mark".QN.merged.maSigPro.out.tsv | wc -l); c=$(tail -n+2 /no_backup/rg/bborsari/projects/ERC/human/2018-01-19.chip-nf/old/analysis/all.marks.3/"$mark"/QN.merged/"$mark".joint.QN.maSigPro.out.tsv | wc -l); echo -e "$mark\t$a\t$b\t$c"; done | awk 'BEGIN{FS=OFS="\t"}{print $0, ($2/($3+$4-$2))}'
+#******
+
+#******
+# 6. test overlap with old analyses
+# w/ respect to
+# number of significant genes for 
+# expression AND the mark
+for mark in H3K4me3 H3K4me1 H3K4me2 H3K9ac H3K27ac H3K27me3 H3K36me3 H3K9me3 H4K20me1; do grep -Ff <(tail -n+2 "$mark"/QN.merged/"$mark".QN.merged.maSigPro.out.tsv | cut -f1 | cut -d "." -f1) <(tail -n+2 expression/QN.merged/expression.matrix.tsv | cut -f1) > ~/public_html/Borsari_et_al_transdifferentiation_chromatin/genes/mean.silent/"$mark".new.txt; grep -Ff <(tail -n+2 /no_backup/rg/bborsari/projects/ERC/human/2018-01-19.chip-nf/old/analysis/all.marks.3/"$mark"/QN.merged/"$mark".joint.QN.maSigPro.out.tsv | cut -f1 | cut -d "." -f1) <(tail -n+2 expression/QN.merged/expression.matrix.tsv | cut -f1) > ~/public_html/Borsari_et_al_transdifferentiation_chromatin/genes/mean.silent/"$mark".old.txt; grep -Ff ~/public_html/Borsari_et_al_transdifferentiation_chromatin/genes/mean.silent/"$mark".old.txt ~/public_html/Borsari_et_al_transdifferentiation_chromatin/genes/mean.silent/"$mark".new.txt > ~/public_html/Borsari_et_al_transdifferentiation_chromatin/genes/mean.silent/"$mark".shared.txt; grep -Fv -f ~/public_html/Borsari_et_al_transdifferentiation_chromatin/genes/mean.silent/"$mark".old.txt ~/public_html/Borsari_et_al_transdifferentiation_chromatin/genes/mean.silent/"$mark".new.txt > ~/public_html/Borsari_et_al_transdifferentiation_chromatin/genes/mean.silent/"$mark".gained.txt; grep -Fv -f ~/public_html/Borsari_et_al_transdifferentiation_chromatin/genes/mean.silent/"$mark".new.txt ~/public_html/Borsari_et_al_transdifferentiation_chromatin/genes/mean.silent/"$mark".old.txt > ~/public_html/Borsari_et_al_transdifferentiation_chromatin/genes/mean.silent/"$mark".lost.txt; done
+for mark in H3K4me3 H3K4me1 H3K4me2 H3K9ac H3K27ac H3K27me3 H3K36me3 H3K9me3 H4K20me1; do a=$(grep -Ff ~/public_html/Borsari_et_al_transdifferentiation_chromatin/genes/mean.silent/"$mark".new.txt ~/public_html/Borsari_et_al_transdifferentiation_chromatin/genes/mean.silent/"$mark".old.txt | wc -l); b=$(cat ~/public_html/Borsari_et_al_transdifferentiation_chromatin/genes/mean.silent/"$mark".new.txt | wc -l); c=$(cat ~/public_html/Borsari_et_al_transdifferentiation_chromatin/genes/mean.silent/"$mark".old.txt | wc -l); echo -e "$mark\t$a\t$b\t$c"; done | awk 'BEGIN{FS=OFS="\t"}{print $0, ($2/($3+$4-$2))}'
+#******
+
+#******
+# 7. for each mark,
+# compute the % of genes significantly
+# variable for expression and the mark
+for mark in H3K4me3 H3K9ac H3K27ac H3K4me1 H3K4me2 H3K27me3 H3K36me3 H3K9me3 H4K20me1; do a=$(grep -Ff <(tail -n+2 "$mark"/QN.merged/"$mark".QN.merged.maSigPro.out.tsv | cut -f1 | cut -d "." -f1) <(tail -n+2 expression/QN.merged/expression.matrix.tsv | cut -f1) | wc -l); b=$(echo "$a / 8030" | bc -l); echo -e "$mark\t$a\t$b"; done | sed '1imark\tn_genes\tpercentage' > percentage.significant.genes.expression.and.mark.tsv
+#******
+
+#******
+# 8. for each mark,
+# compute the % of genes significantly
+# variable only for the mark (excluding silent genes)
+for mark in H3K4me3 H3K9ac H3K27ac H3K4me1 H3K4me2 H3K27me3 H3K36me3 H3K9me3 H4K20me1; do a=$(grep -Fv -f <(cat <(tail -n+2 expression/QN.merged/expression.matrix.tsv | cut -f1) expression/silent.genes.txt) <(tail -n+2 "$mark"/QN.merged/"$mark".QN.merged.maSigPro.out.tsv | cut -f1 | cut -d "." -f1) | wc -l); b=$(echo "$a / 2666" | bc -l); echo -e "$mark\t$a\t$b"; done | sed '1imark\tn_genes\tpercentage' > percentage.significant.genes.only.mark.tsv
+#******
+
+#******
+# 9. for each mark,
+# compute the % of genes significantly
+# variable only for the mark (silent genes only)
+for mark in H3K4me3 H3K9ac H3K27ac H3K4me1 H3K4me2 H3K27me3 H3K36me3 H3K9me3 H4K20me1; do a=$(grep -Ff <(cut -d "." -f1 expression/silent.genes.txt) <(tail -n+2 "$mark"/QN.merged/"$mark".QN.merged.maSigPro.out.tsv | cut -f1 | cut -d "." -f1) | wc -l); b=$(echo "$a / 1552" | bc -l); echo -e "$mark\t$a\t$b"; done | sed '1imark\tn_genes\tpercentage' > percentage.significant.genes.only.mark.silent.tsv
+#******
