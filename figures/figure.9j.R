@@ -46,7 +46,7 @@ clusters <- read.table("../Hi-C/cluster.1.2.3.txt", h=F, sep="\t")
 colnames(clusters) <- c("gene_id", "cluster")
 
 
-# 6. subset clusters df for up-regulated genes
+# 6. subset clusters df for down-regulated genes
 metadata <- read.table("H3K4me3/QN.merged/metadata.tsv", h=T, sep="\t",
                        stringsAsFactors = F)
 clusters <- clusters[clusters$gene_id %in% 
