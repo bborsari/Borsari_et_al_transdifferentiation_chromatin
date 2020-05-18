@@ -44,7 +44,7 @@ palette <- c("H3K9ac" = "#e7298a",
 
 
 # 3. list of marks we're analyzing
-marks <- c("H3K4me1", "H3K4me2", "H3K27ac", "H3K9ac", "H3K4me3", "H3K36me3", "H4K20me1")
+marks <- c("H3K27ac", "H3K9ac", "H4K20me1", "H3K4me3", "H3K4me2", "H3K4me1", "H3K36me3")
 
 
 # 4. read metadata
@@ -136,7 +136,7 @@ for (i in 1:7) {
     theme_bw() +
     scale_color_manual(values = palette) +
     theme(axis.title = element_text(size=11),
-          axis.text.x = element_text(size=11, angle = 30, vjust = .5),
+          axis.text.x = element_text(size=9, angle = 90, vjust = .5),
           axis.text.y = element_text(size=15),
           strip.text.x = element_text(size=15),
           strip.text.y = element_text(size=15, angle = 0),
@@ -145,13 +145,14 @@ for (i in 1:7) {
           panel.grid.major = element_blank(),
           panel.grid.minor = element_blank(), 
           axis.line = element_blank(),
-          plot.title = element_text(size=15, hjust = .5)) +
+          plot.title = element_text(size=15, hjust = .5),
+          legend.title = element_blank(),
+          legend.text = element_text(size=13),
+          legend.position = "bottom") +
     scale_x_discrete(labels = c("0", "3", "6", "9", "12", "18",
-                                "24", "36", "48", "72", "120", "168")) +
-    xlab("time (hours)") +
-    guides(color=F, fill=F)
+                                "24", "36", "48", "72", "120", "168")) 
   
-  if ( (marks[i] == "H3K4me1") | (marks[i] == "H3K4me3") ) {
+  if ( (marks[i] == "H3K27ac") ) {
     
     lop[[i]] <- lop[[i]] + ylab("% of profile")
     
@@ -161,43 +162,23 @@ for (i in 1:7) {
     
   }
   
+  
+  if ( marks[i] == "H3K4me3" ) {
+    
+    lop[[i]] <- lop[[i]] + xlab("time (hours)")
+    
+  } else {
+    
+    lop[[i]] <- lop[[i]] + xlab("")
+    
+  }
+  
+  
 }
 
 
-# 10.2. store legend
-p <- ggplot(df, 
-            aes(x=time_point, 
-                y=median_value*100, 
-                group=type2, 
-                color=type2)) +
-  geom_point() +
-  geom_line() +
-  labs(title = marks[i]) +
-  theme_bw() +
-  scale_color_manual(values = palette) +
-  theme(axis.title = element_text(size=11),
-        axis.text.x = element_text(size=11, angle = 30, vjust = .5),
-        axis.text.y = element_text(size=15),
-        strip.text.x = element_text(size=15),
-        strip.text.y = element_text(size=15, angle = 0),
-        strip.background = element_blank(),
-        panel.border = element_rect(color="black"), 
-        panel.grid.major = element_blank(),
-        panel.grid.minor = element_blank(), 
-        axis.line = element_blank(),
-        plot.title = element_text(size=15, hjust = .5),
-        legend.title = element_blank(),
-        legend.text = element_text(size=15)) +
-  scale_x_discrete(labels = c("0", "3", "6", "9", "12", "18",
-                              "24", "36", "48", "72", "120", "168")) +
-  xlab("time (hours)")
-
-lop[[8]] <- get_legend(p)
-
-
-
-# 10.3. save plot
+# 10.2. save plot
 pdf("~/public_html/Borsari_et_al_transdifferentiation_chromatin/single_figures/fig.8t.pdf",
-    width=16, height=8)
-plot_grid(plotlist = lop, nrow=2)
+    width=16, height=3.5)
+plot_grid(plotlist = lop, nrow=1, align="h")
 dev.off()

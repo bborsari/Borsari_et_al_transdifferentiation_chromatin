@@ -145,7 +145,7 @@ function3 <- function(m, degree) {
   
   
   # 14. make heatmap
-  p <- pheatmap(as.matrix(all.marks.matrix.overlap.reordered*100)[c(1:7, 15:21), ],
+  p <- pheatmap(as.matrix(all.marks.matrix.overlap.reordered*100)[c(1:7, 15:21), c(1:7, 15:21)],
                 color=c('white', '#fef5f4', '#fef2f1', "#fde0dd", '#fa9fb5','#f768a1','#dd3497','#ae017e','#7a0177','#49006a'),
                 breaks=c(0, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100),
                 cluster_rows = F,

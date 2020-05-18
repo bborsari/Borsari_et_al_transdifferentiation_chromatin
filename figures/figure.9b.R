@@ -75,7 +75,7 @@ palette <- c("anticipated" = "#bdbdbd",
 
 # 3. the marks we're analyzing
 marks <- c("H3K27ac", "H3K9ac", "H4K20me1", "H3K4me3", 
-           "H3K4me1", "H3K36me3", "H3K4me2")
+           "H3K4me2", "H3K4me1", "H3K36me3")
 
 
 # 4. make plots
