@@ -1,0 +1,154 @@
+#*****
+# 1. prepare folder to
+# store results for
+# mark and expression analyses
+# mkdir mark expression &&
+#*****
+
+#******
+# 2. run bwtool matrix analysis (mark)
+# for group in positively_correlated negatively_correlated no_peak stable not_correlated; do
+#  	for rep in 1 2; do
+#  		for t in H000 H003 H006 H072 H120 H168; do
+#  			for type in major minor; do
+#  				bw=$(grep -F "$t" ../../H3K9me3.R"$rep".pileup.bw.txt);
+#  				for class in upregulation downregulation; do
+#  					bwtool matrix 2000:2000 -keep-bed ../bedfiles/"$t"H3K9me3X"$rep"."$group"."$type".TSSs."$class".bed $bw mark/"$t"H3K9me3X"$rep"."$type"."$group"."$class".bwtool.matrix.tsv;
+#  				done;
+#  			done;
+#  		done;
+#  	done;
+# done &&
+#******
+
+#******
+# 3. assign to each row the gene_id (mark)
+# for group in positively_correlated negatively_correlated no_peak stable not_correlated; do
+#  	for rep in 1 2; do
+#  		for t in H000 H003 H006 H072 H120 H168; do
+#  			for type in major minor; do
+#  				for class in upregulation downregulation; do
+#  					cut -f4,7- mark/"$t"H3K9me3X"$rep"."$type"."$group"."$class".bwtool.matrix.tsv > tmp;
+#  					mv tmp mark/"$t"H3K9me3X"$rep"."$type"."$group"."$class".bwtool.matrix.tsv;
+#  				done;
+#  			done;
+#  		done;
+#  	done;
+# done &&
+
+# for group in positively_correlated negatively_correlated no_peak stable not_correlated; do
+#  	for rep in 1 2; do
+#  		for t in H000 H003 H006 H072 H120 H168; do
+#  			for class in upregulation downregulation; do
+#  				/no_backup/rg/bborsari/projects/ERC/human/2018-01-19.chip-nf/Borsari_et_al/bin/join.py -b <(cut -f4,7 ../bedfiles/"$t"H3K9me3X"$rep"."$group".major.TSSs."$class".bed) -a mark/"$t"H3K9me3X"$rep".major."$group"."$class".bwtool.matrix.tsv | cut -f2- > tmp;
+#  				mv tmp mark/"$t"H3K9me3X"$rep".major."$group"."$class".bwtool.matrix.tsv;
+#  			done;
+#  		done;
+#  	done;
+# done &&
+
+# for group in positively_correlated negatively_correlated no_peak stable not_correlated; do
+#  	for rep in 1 2; do
+#  		for t in H000 H003 H006 H072 H120 H168; do
+#  			for class in upregulation downregulation; do
+#  				awk 'BEGIN{FS=OFS="\t"}{split($1, a, "."); $1=a[1]; print $0}' mark/"$t"H3K9me3X"$rep".major."$group"."$class".bwtool.matrix.tsv > tmp;
+#  				mv tmp mark/"$t"H3K9me3X"$rep".major."$group"."$class".bwtool.matrix.tsv;
+#  			done;
+#  		done;
+#  	done;
+# done &&
+
+# for group in positively_correlated negatively_correlated no_peak stable not_correlated; do
+#  	for rep in 1 2; do
+#  		for t in H000 H003 H006 H072 H120 H168; do
+#  			for class in upregulation downregulation; do
+#  				/no_backup/rg/bborsari/projects/ERC/human/2018-01-19.chip-nf/Borsari_et_al/bin/selectMatrixRows.sh <(grep -Ff <(grep -Ff <(grep -F "$class" ../metadata.tsv | cut -f1) <(grep -F "$group" ../H3K9me3.6.groups.tsv) | cut -f1) ../H3K9me3.matrix.tsv | sort -k2,2g -s | cut -f1) <(/no_backup/rg/bborsari/projects/ERC/human/2018-01-19.chip-nf/Borsari_et_al/bin/add_header.sh mark/"$t"H3K9me3X"$rep".major."$group"."$class".bwtool.matrix.tsv) > tmp;
+#  				mv tmp mark/"$t"H3K9me3X"$rep".major."$group"."$class".bwtool.matrix.tsv;
+#  			done;
+#  		done;
+#  	done;
+# done
+#******
+
+#******
+# 4. soft links to .txt with path to bw files 
+# plus & minus strand - expression
+ln -s /no_backup/rg/bborsari/projects/ERC/human/2018-01-19.chip-nf/Borsari_et_al/analysis/all.marks/expression/expression.R1.unique.minus.bw.txt expression/ &&
+ln -s /no_backup/rg/bborsari/projects/ERC/human/2018-01-19.chip-nf/Borsari_et_al/analysis/all.marks/expression/expression.R1.unique.plus.bw.txt expression/ &&
+ln -s /no_backup/rg/bborsari/projects/ERC/human/2018-01-19.chip-nf/Borsari_et_al/analysis/all.marks/expression/expression.R2.unique.minus.bw.txt expression/ &&
+ln -s /no_backup/rg/bborsari/projects/ERC/human/2018-01-19.chip-nf/Borsari_et_al/analysis/all.marks/expression/expression.R2.unique.plus.bw.txt expression/ &&
+#*****
+
+#******
+# 5. run bwtool matrix analysis (expression)
+# only major TSS
+for group in positively_correlated negatively_correlated no_peak stable not_correlated; do
+  	for rep in 1 2; do
+  		for t in H000 H003 H006 H072 H120 H168; do
+  			for strand in plus minus; do
+  				bw=$(grep -F "$t" expression/expression.R"$rep".unique."$strand".bw.txt);
+  				for class in upregulation downregulation; do
+  					bwtool matrix 2000:2000 -keep-bed ../bedfiles/"$t"H3K9me3X"$rep"."$group".major.TSSs."$class"."$strand".bed $bw expression/"$t"H3K9me3X"$rep".major."$group"."$class"."$strand".bwtool.matrix.tsv;
+  				done;
+  			done;
+  		done;
+  	done;
+done &&
+#******
+
+#******
+# 6. assign to each row the gene_id
+for group in positively_correlated negatively_correlated no_peak stable not_correlated; do
+  	for rep in 1 2; do
+  		for t in H000 H003 H006 H072 H120 H168; do
+  			for strand in plus minus; do
+  				for class in upregulation downregulation; do
+  					cut -f4,7- expression/"$t"H3K9me3X"$rep".major."$group"."$class"."$strand".bwtool.matrix.tsv > tmp;
+  					mv tmp expression/"$t"H3K9me3X"$rep".major."$group"."$class"."$strand".bwtool.matrix.tsv;
+  				done;
+  			done;
+  		done;
+  	done;
+done && 
+
+for group in positively_correlated negatively_correlated no_peak stable not_correlated; do
+   	for rep in 1 2; do
+   		for t in H000 H003 H006 H072 H120 H168; do
+ 			for strand in plus minus; do
+ 	  			for class in upregulation downregulation; do
+   					/no_backup/rg/bborsari/projects/ERC/human/2018-01-19.chip-nf/Borsari_et_al/bin/join.py -b <(cut -f4,7 ../bedfiles/"$t"H3K9me3X"$rep"."$group".major.TSSs."$class"."$strand".bed) -a expression/"$t"H3K9me3X"$rep".major."$group"."$class"."$strand".bwtool.matrix.tsv | cut -f2- > tmp;
+   					mv tmp expression/"$t"H3K9me3X"$rep".major."$group"."$class"."$strand".bwtool.matrix.tsv;
+   				done;
+ 			done;
+   		done;
+   	done;
+done &&
+
+for group in positively_correlated negatively_correlated no_peak stable not_correlated; do
+   	for rep in 1 2; do
+   		for t in H000 H003 H006 H072 H120 H168; do
+ 			for strand in plus minus; do
+ 	  			for class in upregulation downregulation; do
+   					awk 'BEGIN{FS=OFS="\t"}{split($1, a, "."); $1=a[1]; print $0}' expression/"$t"H3K9me3X"$rep".major."$group"."$class"."$strand".bwtool.matrix.tsv > tmp;
+   					mv tmp expression/"$t"H3K9me3X"$rep".major."$group"."$class"."$strand".bwtool.matrix.tsv;
+   				done
+ 			done;
+   		done;
+   	done;
+done &&
+#******
+
+#******
+# 7. merge the results from the two strands
+for group in positively_correlated negatively_correlated no_peak stable not_correlated; do
+	for rep in 1 2; do
+  		for t in H000 H003 H006 H072 H120 H168; do
+  			for class in upregulation downregulation; do
+				cat expression/"$t"H3K9me3X"$rep".major."$group"."$class".plus.bwtool.matrix.tsv expression/"$t"H3K9me3X"$rep".major."$group"."$class".minus.bwtool.matrix.tsv > tmp
+				/no_backup/rg/bborsari/projects/ERC/human/2018-01-19.chip-nf/Borsari_et_al/bin/add_header.sh tmp > expression/"$t"H3K9me3X"$rep".major."$group"."$class".bwtool.matrix.tsv
+				rm tmp
+			done
+		done
+	done
+done
+#*****

@@ -1,0 +1,51 @@
+#*****
+# 1. define bedfile of promoter regions
+# myBed="/no_backup/rg/bborsari/projects/ERC/human/2018-01-19.chip-nf/Borsari_et_al/analysis/all.marks/bed.files/non.redundant.TSS.2Kb.up.down.bed" &&
+#*****
+
+#*****
+# 2. retrieve bedfiles of major and minor TSSs
+# for t in H000 H003 H006 H009 H012 H018 H024 H036 H048 H072 H120 H168; do
+#     	for rep in 1 2; do
+#     		tail -n+2 ../../bwtool/"$t"H3K4me1X"$rep".pileup_signal.all.genes.summary.tsv | awk 'BEGIN{FS=OFS="\t"}{split($4, a, "_"); $4=a[1]; print $0, a[2]}' | sort -k4,4 -k12,12gr -s | sort -u -k4,4 -s | awk 'BEGIN{FS=OFS="\t"}{print $NF}' > tmp.major;
+#    		/no_backup/rg/bborsari/projects/ERC/human/2018-01-19.chip-nf/Borsari_et_al/bin/discardRows.sh tmp.major <(awk 'BEGIN{FS=OFS="\t"}{split($4, a, "_"); $4=a[1]; print a[2], $0}' ../../bwtool/H000H3K4me1X1.pileup_signal.all.genes.summary.tsv) | tail -n+2 | cut -f1 | sort -u > tmp.minor;
+#     		grep -Ff tmp.major $myBed > "$t"H3K4me1X"$rep".major.TSSs.bed;
+#     		grep -Ff tmp.minor $myBed > "$t"H3K4me1X"$rep".minor.TSSs.bed;
+#     	done
+# done &&
+# rm tmp.minor tmp.major &&
+#******
+
+#******
+# 3. retrieve bed files of major and minor TSS 
+# for the different groups - separating 
+# upregulated and downregulated genes
+# for rep in 1 2; do
+#  	for t in H000 H003 H006 H009 H012 H018 H024 H036 H048 H072 H120 H168; do
+#  		for type in major minor; do
+#  			for group in positively_correlated negatively_correlated no_peak stable not_correlated; do
+#  				for class in upregulation downregulation; do
+#  					grep -Ff <(sed 's/peak\_not\_TSS/no\_peak/g' ../H3K4me1.6.groups.tsv | awk -v class="$class" -v group="$group" 'BEGIN{FS=OFS="\t"} $6==class && $NF==group {print $1}') "$t"H3K4me1X"$rep"."$type".TSSs.bed > "$t"H3K4me1X"$rep"."$group"."$type".TSSs."$class".bed;
+#  				done;
+#  			done;
+#  		done;
+#  	done;
+# done
+#******
+
+#******
+# 4. retrieve bed files of major and minor TSS
+# for the different groups - separating
+# upregulated and downregulated genes
+# and plus vs. minus strand
+for group in positively_correlated negatively_correlated no_peak stable not_correlated; do
+	for rep in 1 2; do
+		for t in H000 H003 H006 H072 H120 H168; do
+			for class in upregulation downregulation; do
+				awk 'BEGIN{FS=OFS="\t"} $6=="+"' "$t"H3K4me1X"$rep"."$group".major.TSSs."$class".bed > "$t"H3K4me1X"$rep"."$group".major.TSSs."$class".plus.bed
+				awk 'BEGIN{FS=OFS="\t"} $6=="-"' "$t"H3K4me1X"$rep"."$group".major.TSSs."$class".bed > "$t"H3K4me1X"$rep"."$group".major.TSSs."$class".minus.bed
+			done;
+		done;
+	done;
+done
+#*****

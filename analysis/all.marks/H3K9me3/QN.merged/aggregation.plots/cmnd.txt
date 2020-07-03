@@ -1,0 +1,42 @@
+#******
+# 1. load conda environment
+conda activate ERC_human &&
+#******
+
+#******
+# 2. perform bwtool aggregate
+# for the different groups,
+# separating upregulated and downregulated
+# and discriminating major and minor TSSs
+for group in positively_correlated negatively_correlated no_peak stable not_correlated; do
+ 	for rep in 1 2; do
+ 		for t in H000 H003 H006 H009 H012 H018 H024 H036 H048 H072 H120 H168; do
+ 			for type in major minor; do
+ 				bw=$(grep -F "$t" ../../H3K9me3.R"$rep".pileup.bw.txt);
+ 				for class in upregulation downregulation; do
+ 					bwtool aggregate 2000:2000 ../bedfiles/"$t"H3K9me3X"$rep"."$group"."$type".TSSs."$class".bed $bw "$t"H3K9me3X"$rep"."$type"."$group"."$class".bwtool.aggregate.tsv;
+ 				done;
+ 			done;
+ 		done;
+ 	done;
+done &&
+#******
+
+#******
+# 3. add to bwtool aggregate outputs
+# info regarding group, class, type of TSS, time_point, replicate
+for group in positively_correlated negatively_correlated no_peak stable not_correlated; do
+ 	for rep in 1 2; do
+ 		for t in H000 H003 H006 H009 H012 H018 H024 H036 H048 H072 H120 H168; do
+ 			for type in major minor; do
+ 				for class in upregulation downregulation; do
+ 					awk -v class="$class" -v group="$group" -v rep="$rep" -v t="$t" -v type="$type" 'BEGIN{FS=OFS="\t"}{print $0, group, rep, t, type, class}' "$t"H3K9me3X"$rep"."$type"."$group"."$class".bwtool.aggregate.tsv > tmp;
+ 					mv tmp "$t"H3K9me3X"$rep"."$type"."$group"."$class".bwtool.aggregate.tsv;
+ 				done;
+ 			done;
+ 		done;
+ 	done;
+done &&
+
+cat ./*.bwtool.aggregate.tsv > H3K9me3.all.groups.agg.plot.tsv
+#******

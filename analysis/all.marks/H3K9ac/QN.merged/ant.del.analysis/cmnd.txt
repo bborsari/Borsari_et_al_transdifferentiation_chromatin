@@ -1,0 +1,98 @@
+#******
+# 1. re-scale matrices in scale 0-100%
+
+# 1.1. expression
+~/software/R-3.5.2/bin/Rscript /no_backup/rg/bborsari/projects/ERC/human/2018-01-19.chip-nf/Borsari_et_al/bin/rescale.R -i ../expression.matrix.tsv -o expression.matrix.rescaled.tsv &&
+
+# 1.2. mark
+~/software/R-3.5.2/bin/Rscript /no_backup/rg/bborsari/projects/ERC/human/2018-01-19.chip-nf/Borsari_et_al/bin/rescale.R -i ../H3K9ac.matrix.tsv -o H3K9ac.matrix.rescaled.tsv &&
+#******
+
+#******
+# 2. prepare folders to store results
+mkdir increases decreases &&
+#******
+
+#******
+# 3. retrieve time-point of 
+# 25%, 50%, 75%, 100% of up-regulation
+for x in expression H3K9ac; do
+ 	for y in 0.25 0.50 0.75 1; do
+ 		awk -v y="$y" 'BEGIN{FS=OFS="\t"}NR>1{for (i=3; i<=NF; i++){if ($i >= y && $(i-1) < y){print $1, (i-1); break}}}' "$x".matrix.rescaled.tsv > increases/"$x"."$y".increases.tsv
+ 	done
+done &&
+#******
+
+#******
+# 4. merge results across different time-points
+for x in expression H3K9ac; do
+ 	cp increases/"$x".0.25.increases.tsv increases/"$x".25.50.75.100.tsv
+ 	for y in 0.50 0.75 1; do
+ 		/no_backup/rg/bborsari/projects/ERC/human/2018-01-19.chip-nf/Borsari_et_al/bin/join.py -b increases/"$x".25.50.75.100.tsv -a increases/"$x"."$y".increases.tsv > tmp
+ 		mv tmp increases/"$x".25.50.75.100.tsv
+ 	done
+ 	sed '1i25_perc\t50_perc\t75_perc\t100_perc' increases/"$x".25.50.75.100.tsv > tmp;
+ 	mv tmp increases/"$x".25.50.75.100.tsv
+done &&
+#******
+
+#******
+# 5. select upregulated & positively_correlated genes
+grep -F upregulation ../H3K9ac.6.groups.tsv | grep -F positive | cut -f1 > increases/upregulation.positively_correlated.genes.txt &&
+#******
+
+#******
+# 6. retrieve joint table of expression and H3K9ac 
+# for upregulated & positively_correlated genes
+grep -Ff increases/upregulation.positively_correlated.genes.txt <(/no_backup/rg/bborsari/projects/ERC/human/2018-01-19.chip-nf/Borsari_et_al/bin/join.py -b increases/expression.25.50.75.100.tsv -a increases/H3K9ac.25.50.75.100.tsv) | sed '1ie_25\te_50\te_75\te_100\tm_25\tm_50\tm_75\tm_100' > increases/expression.H3K9ac.dynamics.tsv &&
+#******
+
+#******
+# 7. for each degree of up-regulation
+# define groups of genes with changes
+# in chromatin anticipated, concomitant or delayed
+# with respect to expression
+awk 'BEGIN{FS=OFS="\t"}{if (NR==1) {print $0, "group_25", "group_50", "group_75", "group_100"} else {vector = ""; for (i=2;i<=5;i++){if ($i < $(i+4)) {vector= vector";delayed"} else if ($i > $(i+4)) {vector = vector";anticipated"} else {vector = vector";concomitant"}}; split(vector, a, ";"); print $0, a[2], a[3], a[4], a[5]}}' increases/expression.H3K9ac.dynamics.tsv > increases/tmp; mv increases/tmp increases/expression.H3K9ac.dynamics.tsv &&
+#******
+
+#******
+# 8. retrieve time-point of 
+# 75%, 50%, 25%, 0% of down-regulation
+for x in expression H3K9ac; do
+ 	for y in 0.75 0.50 0.25 0; do
+ 		awk -v y="$y" 'BEGIN{FS=OFS="\t"}NR>1{for (i=3; i<=NF; i++){if ($i <= y && $(i-1) > y){print $1, (i-1); break}}}' "$x".matrix.rescaled.tsv > decreases/"$x"."$y".decreases.tsv
+ 	done
+done &&
+#******
+
+#******
+# 9. merge results across different time-points
+for x in expression H3K9ac; do
+ 	cp decreases/"$x".0.75.decreases.tsv decreases/"$x".75.50.25.0.tsv
+ 	for y in 0.50 0.25 0; do
+ 		/no_backup/rg/bborsari/projects/ERC/human/2018-01-19.chip-nf/Borsari_et_al/bin/join.py -b decreases/"$x".75.50.25.0.tsv -a decreases/"$x"."$y".decreases.tsv > tmp
+ 		mv tmp decreases/"$x".75.50.25.0.tsv
+ 	done
+ 	sed '1i75_perc\t50_perc\t25_perc\t0_perc' decreases/"$x".75.50.25.0.tsv > tmp;
+ 	mv tmp decreases/"$x".75.50.25.0.tsv
+done &&
+#******
+
+#******
+# 10. select downregulated & positively_correlated
+grep -F downregulation ../H3K9ac.6.groups.tsv | grep -F positive | cut -f1 > decreases/downregulation.positively_correlated.genes.txt
+#******
+
+#******
+# 11. retrieve joint table of expression and H3K9ac 
+# for downregulated & positively_correlated genes
+grep -Ff decreases/downregulation.positively_correlated.genes.txt <(/no_backup/rg/bborsari/projects/ERC/human/2018-01-19.chip-nf/Borsari_et_al/bin/join.py -b decreases/expression.75.50.25.0.tsv -a decreases/H3K9ac.75.50.25.0.tsv) | sed '1ie_75\te_50\te_25\te_0\tm_75\tm_50\tm_25\tm_0' > decreases/expression.H3K9ac.dynamics.tsv &&
+#******
+
+#******
+# 12. for each degree of down-regulation
+# define groups of genes with changes
+# in chromatin anticipated, concomitant or delayed
+# with respect to expression
+awk 'BEGIN{FS=OFS="\t"}{if (NR==1) {print $0, "group_75", "group_50", "group_25", "group_0"} else {vector = ""; for (i=2;i<=5;i++){if ($i < $(i+4)) {vector= vector";delayed"} else if ($i > $(i+4)) {vector = vector";anticipated"} else {vector = vector";concomitant"}}; split(vector, a, ";"); print $0, a[2], a[3], a[4], a[5]}}' decreases/expression.H3K9ac.dynamics.tsv > decreases/tmp; mv decreases/tmp decreases/expression.H3K9ac.dynamics.tsv
+#******
