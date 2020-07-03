@@ -53,5 +53,12 @@ grep -Ff <(tail -n+2 expression.QN.merged.maSigPro.out.tsv | cut -f1) selected.g
 # 10. compare with
 # metadata obtained 
 # w/o silent genes
-~/bin/join.py -a metadata.class2.tsv -b /no_backup/rg/bborsari/projects/ERC/human/2018-01-19.chip-nf/test.options/all.marks.mean/expression/QN.merged/metadata.class2.tsv | cut -f1,4,8 | awk '$2!=$3{print $2"_"$3}' | sort | uniq -c
+/no_backup/rg/bborsari/projects/ERC/human/2018-01-19.chip-nf/Borsari_et_al/bin/join.py -a metadata.class2.tsv -b /no_backup/rg/bborsari/projects/ERC/human/2018-01-19.chip-nf/test.options/all.marks.mean/expression/QN.merged/metadata.class2.tsv | cut -f1,4,8 | awk '$2!=$3{print $2"_"$3}' | sort | uniq -c
+#*****
+
+#*****
+# 11. add column with unique label 
+# from either first or second round
+# of classification 
+awk 'BEGIN{FS=OFS="\t"}{if (NR==1) {print $0, "final_class"} else {if ($5=="NA"){final=$2} else {final=$5}; print $0, final}}' metadata.class2.tsv > tmp; mv tmp metadata.class2.tsv 
 #*****
