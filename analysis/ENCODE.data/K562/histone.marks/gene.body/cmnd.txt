@@ -1,0 +1,37 @@
+#******
+# 1. define cell line
+line="K562" &&
+#******
+
+#******
+# 2. define bed file
+myBed="/no_backup/rg/bborsari/projects/ERC/human/2018-01-19.chip-nf/Borsari_et_al/analysis/all.marks/bed.files/gene.body.bed" &&
+#******
+
+#******
+# 3. load conda environment
+conda activate ENCODE_RC &&
+#******
+
+#******
+# 4. run intersection between 
+# myBed and peaks
+/no_backup/rg/bborsari/projects/ERC/human/2018-01-19.chip-nf/Borsari_et_al/bin/parse.list.identifiers.sh --input /no_backup/rg/bborsari/projects/ERC/human/2018-01-19.chip-nf/Borsari_et_al/analysis/ENCODE.data/"$line"/histone.marks/"$line".hg38.histone.marks.bigBed.txt --dir /no_backup/rg/bborsari/projects/ERC/human/2018-01-19.chip-nf/Borsari_et_al/analysis/ENCODE.data/"$line"/bigBed.files | while read target peaks; do /no_backup/rg/bborsari/projects/ERC/human/2018-01-19.chip-nf/Borsari_et_al/bin/intersect.peaks.regions.sh --regions $myBed --peaks $peaks --outFolder analysis --outFile "$target".bed; done &&
+#*******
+
+#*******
+# 5. summarize n. of genes per cluster with peaks
+/no_backup/rg/bborsari/projects/ERC/human/2018-01-19.chip-nf/Borsari_et_al/bin/parse.list.identifiers.sh --input /no_backup/rg/bborsari/projects/ERC/human/2018-01-19.chip-nf/Borsari_et_al/analysis/ENCODE.data/"$line"/histone.marks/"$line".hg38.histone.marks.bigBed.txt --dir /no_backup/rg/bborsari/projects/ERC/human/2018-01-19.chip-nf/Borsari_et_al/analysis/ENCODE.data/"$line"/bigBed.files | while read target peaks; do for cluster in 1 2 3; do for class in upregulated downregulated; do counts=$(grep -Ff /no_backup/rg/bborsari/projects/ERC/human/2018-01-19.chip-nf/Borsari_et_al/analysis/GO.analysis/"$class"."$cluster".genes.txt <(awk '$NF>0' analysis/"$target".bed | cut -f7 | sort -u) | wc -l); echo -e "$target\t$cluster\t$class\t$counts"; done; done; done > histone.marks.binding.per.cluster.tsv &&
+#*******
+
+#*******
+# 6. unload conda environment
+conda deactivate &&
+#*******
+
+#*******
+# 7. prepare table for plot
+for class in upregulated downregulated; do awk -v class="$class" 'BEGIN{FS=OFS="\t"}$3==class{print $1, $2":"$4}' histone.marks.binding.per.cluster.tsv | /no_backup/rg/bborsari/projects/ERC/human/2018-01-19.chip-nf/Borsari_et_al/bin/make.column.list.py | awk 'BEGIN{FS=OFS="\t"}{split($2, a, ";"); split(a[1], a1, ":"); split(a[2], a2, ":"); split(a[3], a3, ":"); print $1, a1[2], a2[2], a3[2]}' > histone.marks.binding.plot.table."$class".tsv; done &&
+sed -i '1icluster1\tcluster2\tcluster3' histone.marks.binding.plot.table.upregulated.tsv
+sed -i '1icluster1\tcluster2\tcluster3' histone.marks.binding.plot.table.downregulated.tsv 
+#*******

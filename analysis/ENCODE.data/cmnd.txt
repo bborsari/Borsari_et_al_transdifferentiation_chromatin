@@ -1,0 +1,32 @@
+#******
+# 1. prepare a folder for each cell line
+cat cell.lines.txt | while read line; do mkdir $line; done
+#******
+
+#******
+# 2. soft links to existing bigBed folders
+cat cell.lines.txt | while read line; do ln -s /no_backup/rg/bborsari/projects/ENCODE/RNA-Chromatin/"$line"/bigBed.files "$line"/bigBed.files; done
+#******
+
+#******
+# 3. prepare folders to store results 
+# of TFs, chromatin remodellers and RNA Pol Complex
+cat cell.lines.txt | while read line; do mkdir "$line"/TFs "$line"/chromatin.remodellers "$line"/RNA.pol.complex; done
+#******
+
+#******
+# 4. prepare folders to store results of histone marks
+cat cell.lines.txt | while read line; do mkdir "$line"/histone.marks; done
+cat cell.lines.txt | while read line; do cd "$line"/histone.marks; ln -s /no_backup/rg/bborsari/projects/ENCODE/RNA-Chromatin/"$line"/histone.marks/"$line".hg38.histone.marks.bigBed.txt; mkdir gene.body promoter; cd ../../; done
+cat cell.lines.txt | while read line; do for x in gene.body promoter; do for y in cmnd readme; do sed 's/TFs/histone.marks/g' "$line"/TFs/"$x"/"$y".txt > "$line"/histone.marks/"$x"/"$y".txt; done; done; done
+#******
+
+#******
+# 5. prepare folders to store RNA-seq data
+cat cell.lines.txt | while read line; do mkdir "$line"/quantifications; done
+#******
+
+#******
+# 6. download tsv files with gene expression quantifications
+cat cell.lines.txt | while read line; do cat "$line"/quantifications/ids.tsv | while read filename cell_line rep; do wget -P "$line"/quantifications "https://www.encodeproject.org/files/$filename/@@download/$filename.tsv"; mv "$line"/quantifications/"$filename".tsv "$line"/quantifications/"$cell_line"."$rep".tsv; done; done
+#******
