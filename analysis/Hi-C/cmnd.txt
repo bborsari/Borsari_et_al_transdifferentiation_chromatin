@@ -1,0 +1,66 @@
+#*****
+# 1. retrieve avg between replicates
+awk 'BEGIN{FS=OFS="\t"}NR>1{print $1, $2, $3, ($4+$5)/2, ($6+$7)/2, ($8+$9)/2, ($10+$11)/2, ($12+$13)/2, ($14+$15)/2, ($16+$17)/2, ($18+$19)/2, ($20+$21)/2, ($22+$23)/2, ($24+$25)/2}' ev100kb_BLaER_TD.txt > ev100kb_BLaER_TD.avg.replicates.txt
+sed '1ichrom\tstart\tend\tH000\tH009\tH018\tH024\tH048\tH072\tH096\tH120\tH144\tH168\tH192' ev100kb_BLaER_TD.avg.replicates.txt > tmp; mv tmp ev100kb_BLaER_TD.avg.replicates.txt
+#*****
+
+#*****
+# 2. prepare separate file with
+# only matching time-points
+/no_backup/rg/bborsari/projects/ERC/human/2018-01-19.chip-nf/Borsari_et_al/bin/selectColumns.sh chrom:start:end:H000:H009:H018:H024:H048:H072:H120:H168 ev100kb_BLaER_TD.avg.replicates.txt > matching.time.points/ev100kb_BLaER_TD.avg.replicates.txt
+mv ev100kb_BLaER_TD.avg.replicates.txt all.time.points/
+#*****
+
+#*****
+# 3. load environment
+conda activate ERC_human
+#*****
+
+#*****
+# 4. merge all clusters in a unique file
+for i in 1 2 3; do awk -v cluster="$i" 'BEGIN{FS=OFS="\t"}{print $0, "cluster"cluster}' cluster."$i".txt; done > cluster.1.2.3.txt
+#*****
+
+#*****
+# 5. compute number of switches between A and B compartments 
+# across time points for the 8030 genes
+
+# 5.1. all time-points
+bedtools intersect -a <(grep -Ff <(cut -f1 cluster.1.2.3.txt) /no_backup/rg/bborsari/projects/ERC/human/2018-01-19.chip-nf/Borsari_et_al/bed.files/gencode.v24.protein.coding.gene.body.bed) -b all.time.points/ev100kb_BLaER_TD.avg.replicates.txt -wo | cut -f4,11-21 | awk 'BEGIN{FS=OFS="\t"}{n=0; if ($2<0){comp = "b"} else {comp = "a"}; for (i=3; i<=NF; i++){if ($i<0){comp2 = "b"} else {comp2="a"}; if (comp != comp2) {n++}; comp=comp2}; split($1, a, "."); print a[1], n}' | sort -k1,1 -k2,2nr | sort -u -k1,1 > all.time.points/number.switches.cluster.1.2.3.txt
+
+# 5.2. matching time-points
+bedtools intersect -a <(grep -Ff <(cut -f1 cluster.1.2.3.txt) /no_backup/rg/bborsari/projects/ERC/human/2018-01-19.chip-nf/Borsari_et_al/bed.files/gencode.v24.protein.coding.gene.body.bed) -b matching.time.points/ev100kb_BLaER_TD.avg.replicates.txt -wo | cut -f4,11-18 | awk 'BEGIN{FS=OFS="\t"}{n=0; if ($2<0){comp = "b"} else {comp = "a"}; for (i=3; i<=NF; i++){if ($i<0){comp2 = "b"} else {comp2="a"}; if (comp != comp2) {n++}; comp=comp2}; split($1, a, "."); print a[1], n}' | sort -k1,1 -k2,2nr | sort -u -k1,1 > matching.time.points/number.switches.cluster.1.2.3.txt
+#*****
+
+#*****
+# 6. check the 254 missing genes
+# most of them are on chrX, missing from Gregoire's file
+grep -Ff <(/no_backup/rg/bborsari/projects/ERC/human/2018-01-19.chip-nf/Borsari_et_al/bin/discardRows.sh <(cut -f1 all.time.points/number.switches.cluster.1.2.3.txt) cluster.1.2.3.txt | cut -f1) /no_backup/rg/bborsari/projects/ERC/human/2018-01-19.chip-nf/Borsari_et_al/bed.files/gencode.v24.protein.coding.gene.body.bed | cut -f1 | sort | uniq -c
+#*****
+
+#*****
+# 7. add cluster info
+for folder in all.time.points matching.time.points; do /no_backup/rg/bborsari/projects/ERC/human/2018-01-19.chip-nf/Borsari_et_al/bin/join.py -b cluster.1.2.3.txt -a "$folder"/number.switches.cluster.1.2.3.txt > tmp; mv tmp "$folder"/number.switches.cluster.1.2.3.txt; done
+#*****
+
+#*****
+# 8. linc RNAs transitions
+
+# 8.1. all time-points
+bedtools intersect -a lincRNAs.bed -b all.time.points/ev100kb_BLaER_TD.avg.replicates.txt -wo | cut -f4,8-18 | awk 'BEGIN{FS=OFS="\t"}{n=0; if ($2<0){comp = "b"} else {comp = "a"}; for (i=3; i<=NF; i++){if ($i<0){comp2 = "b"} else {comp2="a"}; if (comp != comp2) {n++}; comp=comp2}; split($1, a, "."); print a[1], n}' | sort -k1,1 -k2,2nr | sort -u -k1,1
+
+# 8.2. matching time-points
+bedtools intersect -a lincRNAs.bed -b matching.time.points/ev100kb_BLaER_TD.avg.replicates.txt -wo | cut -f4,8-15 | awk 'BEGIN{FS=OFS="\t"}{n=0; if ($2<0){comp = "b"} else {comp = "a"}; for (i=3; i<=NF; i++){if ($i<0){comp2 = "b"} else {comp2="a"}; if (comp != comp2) {n++}; comp=comp2}; split($1, a, "."); print a[1], n}' | sort -k1,1 -k2,2nr | sort -u -k1,1
+#*****
+
+#*****
+# 9. prepare complete datasets
+# with compartment values for all time-points
+# and number of transitions
+
+# 9.1. matching time-points
+bedtools intersect -a <(grep -Ff <(cut -f1 cluster.1.2.3.txt) /no_backup/rg/bborsari/projects/ERC/human/2018-01-19.chip-nf/Borsari_et_al/bed.files/gencode.v24.protein.coding.gene.body.bed) -b matching.time.points/ev100kb_BLaER_TD.avg.replicates.txt -wo | cut -f4,11-18 | awk 'BEGIN{FS=OFS="\t"}{n=0; if ($2<0){comp = "b"} else {comp = "a"}; for (i=3; i<=NF; i++){if ($i<0){comp2 = "b"} else {comp2="a"}; if (comp != comp2) {n++}; comp=comp2}; split($1, a, "."); print a[1], $0, n}' | cut -f1,3- > matching.time.points/complete.data.set.tsv
+
+# 9.2. all time-points
+bedtools intersect -a <(grep -Ff <(cut -f1 cluster.1.2.3.txt) /no_backup/rg/bborsari/projects/ERC/human/2018-01-19.chip-nf/Borsari_et_al/bed.files/gencode.v24.protein.coding.gene.body.bed) -b all.time.points/ev100kb_BLaER_TD.avg.replicates.txt -wo | cut -f4,11-21 | awk 'BEGIN{FS=OFS="\t"}{n=0; if ($2<0){comp = "b"} else {comp = "a"}; for (i=3; i<=NF; i++){if ($i<0){comp2 = "b"} else {comp2="a"}; if (comp != comp2) {n++}; comp=comp2}; split($1, a, "."); print a[1], $0, n}' | cut -f1,3- > all.time.points/complete.data.set.tsv
+#*****
