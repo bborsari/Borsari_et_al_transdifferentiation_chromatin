@@ -1,0 +1,20 @@
+#*******
+# 1. subsets of upreg/downreg/peaking/bending
+# for the 3 clusters
+grep -F "upregulation" metadata.class2.tsv | cut -f1 > upregulated.genes.txt 
+grep -F "downregulation" metadata.class2.tsv | cut -f1 > downregulated.genes.txt 
+grep -F "peaking" metadata.class2.tsv | cut -f1 > peaking.genes.txt 
+grep -F "bending" metadata.class2.tsv | cut -f1 > bending.genes.txt 
+for class in upregulated downregulated peaking bending; do for cluster in 1 2 3; do grep -Ff "$class".genes.txt cluster."$cluster".txt > "$class"."$cluster".genes.txt; done; done
+#*******
+
+#*******
+# 2. prepare folders for GO enrichment for clusters
+mkdir -p clusters/BP clusters/MF clusters/CC
+#*******
+
+#*******
+# 3. for REVIGO analysis,
+# keep only terms with FDR < 0.05
+for x in BP MF CC; do for y in 1 2 3; do awk 'BEGIN{FS=OFS="\t"}$4<0.05{print $1, $3}' clusters/"$x"/cluster"$y"."$x".tsv > clusters/"$x"/cluster"$y"."$x".revigo.tsv; done; done
+#********

@@ -1,0 +1,10 @@
+#********
+# 1. GO analysis with GORILLA
+# input: /users/rg/bborsari/public_html/Borsari_et_al_transdifferentiation_chromatin/genes/silent.genes.expression/silent.genes.variable.for.one.mark.txt
+# background: /users/rg/bborsari/public_html/Borsari_et_al_transdifferentiation_chromatin/genes/silent.genes.expression/silent.genes.txt
+#********
+
+#********
+# 2. prepare input for REVIGO
+awk 'BEGIN{FS=OFS="\t"}NR>1 && $4<0.05{print $1, $3}' silent.genes.BP.txt > silent.genes.revigo.txt
+#********
