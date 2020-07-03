@@ -7,11 +7,10 @@ setwd("/no_backup/rg/bborsari/projects/ERC/human/2018-01-19.chip-nf/Borsari_et_a
 #**********
 
 
-palette <- c("#662506", "#993404", "#cc4c02",
-             "#ec7014", "#fe9929", "#fec44f",
-             '#addd8e','#78c679','#41ab5d',
-             '#238443','#006837','#004529'
-)
+palette <- c("#D3DCE0", "#9FB4C4", "#798FA6", "#4D6478", "#33475C", "black")
+palette <- colorRampPalette(palette)(12)
+
+
 
 
 names(palette) <- c("H000", "H003", "H006", "H009",
@@ -57,17 +56,18 @@ aggregation.plot <- function(mark,
     scale_color_manual(values = palette) +
     facet_wrap(~my.mark) +
     theme_bw() +
-    theme(panel.border = element_blank(), 
+    theme(panel.border = element_rect(color="black"), 
           panel.grid.major = element_blank(),
           panel.grid.minor = element_blank(), 
+          axis.line = element_line(colour = "black"),
           legend.title = element_text(size=15),
           legend.text = element_text(size=15),
-          axis.line = element_line(colour = "black"),
           axis.text.y = element_text(size=15),
           axis.text.x = element_text(size = 15, angle = 30, vjust = .5),
           axis.title = element_text(size = 15),
           plot.margin = unit(c(0, 0, 0, 0), "cm"),
-          strip.text.x = element_text(size = 15)) +
+          strip.text.x = element_text(size = 17),
+          strip.background.x = element_blank()) +
     scale_x_continuous(breaks=c(-5000, 0, my.length, my.length+5000),
                        labels=c("-5 Kb", "0%", "100%", "+5 Kb")) +
     geom_vline(xintercept = 0, linetype = "dashed") +
@@ -109,7 +109,8 @@ lop[[1]] <- aggregation.plot(mark = "H3K36me3",
                              plot.axis.title.y = T)
 
 lop[[2]] <- aggregation.plot(mark = "H4K20me1",
-                             my.string = "H4K")
+                             my.string = "H4K",
+                             plot.axis.title.x = T)
 
 
 
@@ -118,7 +119,8 @@ my.legend <- get_legend(lop[[1]])
 lop <- lapply(lop, function(x){x <- x + guides(color=F, linetype=F)})
 
 
-pdf("~/public_html/Borsari_et_al_transdifferentiation_chromatin/single_figures/fig.7f.pdf", width = 14, height=5)
+pdf("~/public_html/Borsari_et_al_transdifferentiation_chromatin/single_figures/fig.7f.pdf", 
+    width = 14, height=5)
 main.p <- plot_grid(plotlist = lop, nrow=1, ncol=2, align="h", scale = .9)
 whole.p <- plot_grid(main.p, my.legend, nrow=1, rel_widths = c(0.9, 0.1))
 whole.p

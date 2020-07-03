@@ -1,0 +1,181 @@
+.libPaths("/nfs/users2/rg/bborsari/software/R-3.5.2/library")
+
+
+
+#************
+# LIBRARIES *
+#************
+
+
+library(ComplexHeatmap)
+library(dplyr)
+library(tidyr)
+library(circlize)
+library(seriation)
+
+
+#************
+# FUNCTIONS *
+#************
+
+function1 <- function(mark) {
+  
+  # 1. read mark matrix of 12448 genes after QN merged normalization
+  mark.matrix <- read.table(paste0(mark, "/QN.merged/", mark, ".matrix.after.QN.merged.tsv"),
+                            h=T, sep="\t")
+  
+  
+  # 2. keep only not expressed genes
+  mark.matrix <- mark.matrix[rownames(mark.matrix) %in% not.expressed.genes, ]
+  
+  
+  # 3. center and scale mark matrix of not expressed genes 
+  mark.matrix.scaled <- as.data.frame(t(scale(t(mark.matrix))))
+  
+  
+  # 4. retrieve set of marked genes
+  marked.genes <- read.table(paste0(mark, "/QN.merged/all.genes.intersecting.peaks.tsv"),
+                             h=F, sep="\t", stringsAsFactors = F)
+  marked.genes <- marked.genes$V1
+  
+  
+  # 5. retrieve set of genes w/ variable profile for the mark
+  mark.sig.genes <- read.table(paste0(mark, "/QN.merged/", mark, ".QN.merged.maSigPro.out.tsv"), 
+                               h=T, sep="\t")
+  mark.sig.genes$gene_id <- rownames(mark.sig.genes)
+  mark.sig.genes <- mark.sig.genes %>% separate(gene_id, c("gene", "id"), "\\.")
+  rownames(mark.sig.genes) <- mark.sig.genes$gene
+  mark.sig.genes$gene <- NULL
+  mark.sig.genes$id <- NULL
+  mark.sig.genes <- rownames(mark.sig.genes)[rownames(mark.sig.genes) %in% not.expressed.genes]
+  
+  
+  # 7. retrieve differentially marked genes (aka w/ peak of the mark and variable profile)
+  mark.sig.genes <- intersect(mark.sig.genes, marked.genes)
+  
+  print(mark)
+  print(length(mark.sig.genes))
+  
+  
+  # 8. return mark matrix scaled for differentially marked genes
+  x <- mark.matrix.scaled[rownames(mark.matrix.scaled) %in% mark.sig.genes, ]
+  x$mark <- mark
+  x$gene_id <- rownames(x)
+  
+  return(x)
+  
+  
+}
+
+
+#********
+# BEGIN *
+#********
+
+# 1. set working directory
+setwd("/no_backup/rg/bborsari/projects/ERC/human/2018-01-19.chip-nf/Borsari_et_al/analysis/all.marks/")
+
+
+# 2. retrieve set of not expressed genes
+not.expressed.genes <- read.table("expression/silent.genes.txt", h=F, sep="\t", 
+                                  stringsAsFactors = F)
+not.expressed.genes <- not.expressed.genes$V1
+
+
+# 7. the marks we're analyzing
+marks <- c("H3K27ac", "H3K9ac", "H4K20me1", "H3K4me3", "H3K4me1", "H3K36me3",
+           "H3K4me2", "H3K9me3", "H3K27me3")
+
+
+# 8. retrieve matrix of scaled and centered mark values for differentially marked genes
+m <- data.frame(stringsAsFactors = F)
+
+for ( i in 1:9 ) {
+  
+  m <- rbind(m, function1(mark = marks[i]))
+  
+}
+
+
+# 9. apply seriation
+ser.obj <- seriate(as.matrix(m[, 1:12]), method = "PCA_angle")
+m.ser <- m[get_order(ser.obj, 1), ]
+
+
+# 10. prepare df for heatmap
+df.plot <- data.frame(stringsAsFactors = F)
+y <- c()
+
+for ( i in 1:9 ) {
+  
+  # 10.1. mark matrix reordered according to seriation order
+  tmp1 <- m.ser[m.ser$mark == marks[i], ]
+  rownames(tmp1) <- tmp1$gene_id # recover gene_id
+  tmp1 <- tmp1[, 1:12]
+  colnames(tmp1) <- paste(colnames(tmp1), "mark", sep="_")
+  
+  # 10.3. store number of genes for each mark
+  y <- c(y, nrow(tmp1))
+  
+  # 10.4. store df for mark and expression
+  df.plot <- rbind(df.plot, tmp1)
+  
+}
+
+
+# 11. prepare mark partition for heatmap
+mark.partition <- c()
+for ( i in 1:9 ) {
+  
+  mark.partition <- c(mark.partition, rep(marks[i], y[i]))
+  
+}
+
+
+mark.partition <- factor(mark.partition, levels = marks)
+
+
+# 12. define color palettes
+palette1 <- c("H3K9ac" = "#af4d85",
+              "H3K27ac" = "#630039",
+              "H3K4me3" = "#d199b9",
+              "H3K27me3" = "#1d2976",
+              "H3K9me3" = "#a7add4",
+              "H3K36me3" = "#7fbc41",
+              "H4K20me1" = "#4c7027",
+              "H3K4me1" = "#e5ab00",
+              "H3K4me2" = "#a67c00")
+palette1 <- palette1[marks]
+
+palette2 = rev(c('#67001f','#b2182b','#d6604d','#f4a582','#fddbc7','#d1e5f0','#92c5de','#4393c3','#2166ac','#053061'))
+
+
+
+# 13. make heatmap
+
+pdf("~/public_html/Borsari_et_al_transdifferentiation_chromatin/single_figures/fig.9l.pdf", 
+    height=16, width=7.5)
+ht_list <- Heatmap(mark.partition, 
+                   name = "marks", 
+                   col= palette1,
+                   show_heatmap_legend = T,
+                   show_row_names = FALSE, width = unit(15, "mm"),
+                   show_column_names = F,
+                   split = mark.partition,
+                   gap = unit(4, "mm")) +
+  
+  Heatmap(df.plot[, 1:12],
+          col = palette2, 
+          name = "mark", column_title = "mark",
+          column_title_gp = gpar(fontsize = 60),
+          column_names_gp = gpar(fontsize = 60),
+          show_row_names = FALSE, width = unit(120, "mm"),
+          cluster_rows = F, cluster_columns = F,
+          show_column_names = F,
+          show_heatmap_legend = T,
+          heatmap_legend_param = list(title = "z-score"),
+          split = mark.partition,
+          gap = unit(4, "mm"))
+
+print(ht_list)
+dev.off()

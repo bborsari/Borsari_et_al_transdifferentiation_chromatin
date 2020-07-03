@@ -55,7 +55,7 @@ my.function <- function(mark) {
                                                             "down-regulated",
                                                             "peaking",
                                                             "up-regulated")],
-                         show_heatmap_legend = T,
+                         show_heatmap_legend = F,
                          show_row_names = FALSE, width = unit(15, "mm"),
                          show_column_names = F,
                          split = c(rep("changes in \nexpression & mark", nrow(mark.metadata.sig.genes)), 
@@ -77,10 +77,10 @@ my.function <- function(mark) {
             name = "log2(TPM+1)", column_title = "expression",
             column_title_gp = gpar(fontsize = 60),
             column_names_gp = gpar(fontsize = 60),
-            show_row_names = FALSE, width = unit(50, "mm"),
+            show_row_names = FALSE, width = unit(120, "mm"),
             cluster_rows = F, cluster_columns = F,
             show_column_names = F,
-            show_heatmap_legend = T,
+            show_heatmap_legend = F,
             heatmap_legend_param = list(title = "z-score"),
             # bottom_annotation = HeatmapAnnotation(
             #   text = anno_text(colnames(expression.matrix.scaled), 
@@ -97,7 +97,7 @@ my.function <- function(mark) {
             name = mark, column_title = mark,
             column_title_gp = gpar(fontsize = 60),
             column_names_gp = gpar(fontsize = 60),
-            show_row_names = FALSE, width = unit(50, "mm"),
+            show_row_names = FALSE, width = unit(120, "mm"),
             cluster_rows = F, cluster_columns = F,
             show_column_names = F,
             show_heatmap_legend = F,
@@ -123,10 +123,10 @@ my.function <- function(mark) {
 
 setwd("/no_backup/rg/bborsari/projects/ERC/human/2018-01-19.chip-nf/Borsari_et_al/analysis/all.marks/")
 
-palette <- c("down-regulated" = "#810f7c", 
-             "bending" = "#a4a4a4",
-             "up-regulated" = "#f7a673",
-             "peaking" = "#c7e9b4"
+palette <- c("down-regulated" = "#2d7f89", 
+             "bending" = "#7acbd5",
+             "up-regulated" = "#89372d",
+             "peaking" = "#d5847a"
 )
 
 palette2 = rev(c('#67001f','#b2182b','#d6604d','#f4a582','#fddbc7','#d1e5f0','#92c5de','#4393c3','#2166ac','#053061'))
@@ -157,87 +157,87 @@ expression.matrix.scaled <- as.data.frame(t(scale(t(expression.matrix))))
 ### H3K27ac
 ###----------
 
-pdf("~/public_html/Borsari_et_al_transdifferentiation_chromatin/single_figures/fig.1l.H3K27ac.legend.pdf", height=15, width=12)
+pdf("~/public_html/Borsari_et_al_transdifferentiation_chromatin/single_figures/fig.1l.H3K27ac.pdf", height=15, width=12)
 H3K27ac <- my.function(mark = "H3K27ac")
 print(H3K27ac)
 dev.off()
 
 
-# ###--------
-# ### H3K9ac
-# ###--------
-# 
-# pdf("~/public_html/Borsari_et_al_transdifferentiation_chromatin/single_figures/fig.1l.H3K9ac.pdf", height=15, width=12)
-# H3K9ac <- my.function(mark="H3K9ac")
-# print(H3K9ac)
-# dev.off()
-# 
-# 
-# ###--------
-# ### H4K20me1
-# ###--------
-# 
-# pdf("~/public_html/Borsari_et_al_transdifferentiation_chromatin/single_figures/fig.1l.H4K20me1.pdf", height=15, width=12)
-# H4K20me1 <- my.function(mark="H4K20me1")
-# print(H4K20me1)
-# dev.off()
-# 
-# 
-# ###--------
-# ### H3K4me3
-# ###--------
-# 
-# pdf("~/public_html/Borsari_et_al_transdifferentiation_chromatin/single_figures/fig.1l.H3K4me3.pdf", height=15, width=12)
-# H3K4me3 <- my.function(mark = "H3K4me3")
-# print(H3K4me3)
-# dev.off()
-# 
-# 
-# ###--------
-# ### H3K4me1
-# ###--------
-# 
-# pdf("~/public_html/Borsari_et_al_transdifferentiation_chromatin/single_figures/fig.1l.H3K4me1.pdf", height=15, width=12)
-# H3K4me1 <- my.function(mark="H3K4me1")
-# print(H3K4me1)
-# dev.off()
-# 
-# 
-# ###--------
-# ### H3K36me3
-# ###--------
-# 
-# pdf("~/public_html/Borsari_et_al_transdifferentiation_chromatin/single_figures/fig.1l.H3K36me3.pdf", height=15, width=12)
-# H3K36me3 <- my.function(mark="H3K36me3")
-# print(H3K36me3)
-# dev.off()
-# 
-# 
-# ###--------
-# ### H3K4me2
-# ###--------
-# 
-# pdf("~/public_html/Borsari_et_al_transdifferentiation_chromatin/single_figures/fig.1l.H3K4me2.pdf", height=15, width=12)
-# H3K4me2 <- my.function(mark="H3K4me2")
-# print(H3K4me2)
-# dev.off()
-# 
-# 
-# ###--------
-# ### H3K9me3
-# ###--------
-# 
-# pdf("~/public_html/Borsari_et_al_transdifferentiation_chromatin/single_figures/fig.1l.H3K9me3.pdf", height=15, width=12)
-# H3K9me3 <- my.function(mark="H3K9me3")
-# print(H3K9me3)
-# dev.off()
-# 
-# 
-# ###--------
-# ### H3K27me3
-# ###--------
-# 
-# pdf("~/public_html/Borsari_et_al_transdifferentiation_chromatin/single_figures/fig.1l.H3K27me3.pdf", height=15, width=12)
-# H3K27me3 <- my.function(mark="H3K27me3")
-# print(H3K27me3)
-# dev.off()
+###--------
+### H3K9ac
+###--------
+
+pdf("~/public_html/Borsari_et_al_transdifferentiation_chromatin/single_figures/fig.1l.H3K9ac.pdf", height=15, width=12)
+H3K9ac <- my.function(mark="H3K9ac")
+print(H3K9ac)
+dev.off()
+
+
+###--------
+### H4K20me1
+###--------
+
+pdf("~/public_html/Borsari_et_al_transdifferentiation_chromatin/single_figures/fig.1l.H4K20me1.pdf", height=15, width=12)
+H4K20me1 <- my.function(mark="H4K20me1")
+print(H4K20me1)
+dev.off()
+
+
+###--------
+### H3K4me3
+###--------
+
+pdf("~/public_html/Borsari_et_al_transdifferentiation_chromatin/single_figures/fig.1l.H3K4me3.pdf", height=15, width=12)
+H3K4me3 <- my.function(mark = "H3K4me3")
+print(H3K4me3)
+dev.off()
+
+
+###--------
+### H3K4me1
+###--------
+
+pdf("~/public_html/Borsari_et_al_transdifferentiation_chromatin/single_figures/fig.1l.H3K4me1.pdf", height=15, width=12)
+H3K4me1 <- my.function(mark="H3K4me1")
+print(H3K4me1)
+dev.off()
+
+
+###--------
+### H3K36me3
+###--------
+
+pdf("~/public_html/Borsari_et_al_transdifferentiation_chromatin/single_figures/fig.1l.H3K36me3.pdf", height=15, width=12)
+H3K36me3 <- my.function(mark="H3K36me3")
+print(H3K36me3)
+dev.off()
+
+
+###--------
+### H3K4me2
+###--------
+
+pdf("~/public_html/Borsari_et_al_transdifferentiation_chromatin/single_figures/fig.1l.H3K4me2.pdf", height=15, width=12)
+H3K4me2 <- my.function(mark="H3K4me2")
+print(H3K4me2)
+dev.off()
+
+
+###--------
+### H3K9me3
+###--------
+
+pdf("~/public_html/Borsari_et_al_transdifferentiation_chromatin/single_figures/fig.1l.H3K9me3.pdf", height=15, width=12)
+H3K9me3 <- my.function(mark="H3K9me3")
+print(H3K9me3)
+dev.off()
+
+
+###--------
+### H3K27me3
+###--------
+
+pdf("~/public_html/Borsari_et_al_transdifferentiation_chromatin/single_figures/fig.1l.H3K27me3.pdf", height=15, width=12)
+H3K27me3 <- my.function(mark="H3K27me3")
+print(H3K27me3)
+dev.off()

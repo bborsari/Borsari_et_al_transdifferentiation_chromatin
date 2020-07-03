@@ -102,7 +102,7 @@ function1 <- function(m) {
                      rep(marks,3), 
                      sep="_"))]
   rownames(df) <- marks
-  
+
   
   # 7. prepare annotation dataframes for heatmap 
   anno_cols <- data.frame(mark1=rep(marks,3))
@@ -185,6 +185,10 @@ for ( i in 1:7 ) {
   
   
 }
+
+
+
+
 
 
 # 4. make plots for 75%, 50%, 25%, 0% of downregulation

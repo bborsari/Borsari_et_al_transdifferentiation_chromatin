@@ -1,14 +1,14 @@
 .libPaths("/nfs/users2/rg/bborsari/software/R-3.5.2/library")
 
 setwd("/no_backup/rg/bborsari/projects/ERC/human/2018-01-19.chip-nf/Borsari_et_al/analysis/all.marks/")
-palette <- c("H3K9ac" = "#e7298a",
-             "H3K27ac" = "#8e0152",
-             "H3K4me3" = "#f1b6da",
-             "H3K27me3" = "#253494",
-             "H3K9me3" = "#41b6c4",
+palette <- c("H3K9ac" = "#af4d85",
+             "H3K27ac" = "#630039",
+             "H3K4me3" = "#d199b9",
+             "H3K27me3" = "#1d2976",
+             "H3K9me3" = "#a7add4",
              "H3K36me3" = "#7fbc41",
-             "H4K20me1" = "#276419",
-             "H3K4me1" = "#ffbf00",
+             "H4K20me1" = "#4c7027",
+             "H3K4me1" = "#e5ab00",
              "H3K4me2" = "#a67c00",
              "expression" = "white")
 
@@ -109,8 +109,15 @@ names(medians.pearson[order(medians.pearson, decreasing = T)])
 
 all.marks.df.pearson$mark <- as.factor(all.marks.df.pearson$mark)
 all.marks.df.pearson$mark <- factor(all.marks.df.pearson$mark, 
-                                    levels = names(medians.pearson[order(medians.pearson, 
-                                                                         decreasing = T)]))
+                                    levels = c("H3K27ac",
+                                               "H3K9ac",
+                                               "H4K20me1",
+                                               "H3K4me3",
+                                               "H3K4me1",
+                                               "H3K36me3",
+                                               "H3K4me2",
+                                               "H3K9me3",
+                                               "H3K27me3"))
 
 pdf("~/public_html/Borsari_et_al_transdifferentiation_chromatin/single_figures/fig.2c.pearson.pdf",
     width = 10,
@@ -127,10 +134,10 @@ ggplot(all.marks.df.pearson,
         axis.ticks.x = element_blank(),
         axis.title.y = element_text(size=15),
         axis.text = element_text(size=13),
-        panel.border = element_blank(), 
+        panel.border = element_rect(color="black"), 
         panel.grid.major = element_blank(),
         panel.grid.minor = element_blank(), 
-        axis.line = element_line(colour = "black"),
+        axis.line = element_line(colour = "black")
   ) 
 dev.off()
 
@@ -180,8 +187,15 @@ names(medians.spearman[order(medians.spearman, decreasing = T)])
 
 all.marks.df.spearman$mark <- as.factor(all.marks.df.spearman$mark)
 all.marks.df.spearman$mark <- factor(all.marks.df.spearman$mark, 
-                                    levels = names(medians.spearman[order(medians.spearman, 
-                                                                         decreasing = T)]))
+                                    levels = c("H3K27ac",
+                                               "H3K9ac",
+                                               "H4K20me1",
+                                               "H3K4me3",
+                                               "H3K4me1",
+                                               "H3K36me3",
+                                               "H3K4me2",
+                                               "H3K9me3",
+                                               "H3K27me3"))
 
 pdf("~/public_html/Borsari_et_al_transdifferentiation_chromatin/single_figures/fig.2c.spearman.pdf",
     width = 10,
@@ -198,10 +212,10 @@ ggplot(all.marks.df.spearman,
         axis.ticks.x = element_blank(),
         axis.title.y = element_text(size=15),
         axis.text = element_text(size=13),
-        panel.border = element_blank(), 
+        panel.border = element_rect(color="black"), 
         panel.grid.major = element_blank(),
         panel.grid.minor = element_blank(), 
-        axis.line = element_line(colour = "black"),
+        axis.line = element_line(colour = "black")
   ) 
 dev.off()
 

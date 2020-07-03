@@ -76,17 +76,16 @@ for (i in 1:4) {
   
   lop[[i]] <- ggplot(clusters.melt[clusters.melt$variable == x[i], ], 
                      aes(x=value, fill=cluster)) +
-    geom_bar() +
+    geom_bar(color = "black") +
     facet_grid(cluster~variable, scales = "free_y") +
     scale_x_discrete(drop=FALSE) +
     scale_fill_manual(values = palette) +
-    guides(fill=F) +
     theme_bw() +
     theme(axis.title.x = element_text(size=8, hjust = .5),
           axis.title.y = element_text(size=8, vjust = .5),
           axis.text.x = element_text(size=10, angle = 30, vjust=.5),
-          axis.text.y = element_text(size=13),
-          strip.text.x = element_text(size=15),
+          axis.text.y = element_text(size=10),
+          strip.text.x = element_text(size=18),
           axis.ticks.x = element_line(color="black"),
           panel.border = element_rect(color="black"), 
           panel.grid.major = element_blank(),
@@ -105,10 +104,12 @@ for (i in 1:4) {
   
 }
 
-
+leg <- get_legend(lop[[1]])
+lop <- lapply(lop, function(x){x <- x + guides(fill=F)})
 
 
 pdf("~/public_html/Borsari_et_al_transdifferentiation_chromatin/single_figures/fig.9i.pdf", 
     height=8, width=12)
-plot_grid(plotlist = lop, nrow = 1, ncol=4)
+p1 <- plot_grid(plotlist = lop, nrow = 1, ncol=4)
+plot_grid(p1, leg, nrow = 2, ncol=1, rel_heights = c(1, 0.1))
 dev.off()

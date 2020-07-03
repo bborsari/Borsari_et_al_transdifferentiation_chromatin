@@ -2,16 +2,17 @@
 
 
 
-palette <- c("H3K9ac" = "#e7298a",
-             "H3K27ac" = "#8e0152",
-             "H3K4me3" = "#f1b6da",
-             "H3K27me3" = "#253494",
-             "H3K9me3" = "#41b6c4",
+palette <- c("H3K9ac" = "#af4d85",
+             "H3K27ac" = "#630039",
+             "H3K4me3" = "#d199b9",
+             "H3K27me3" = "#1d2976",
+             "H3K9me3" = "#a7add4",
              "H3K36me3" = "#7fbc41",
-             "H4K20me1" = "#276419",
-             "H3K4me1" = "#ffbf00",
+             "H4K20me1" = "#4c7027",
+             "H3K4me1" = "#e5ab00",
              "H3K4me2" = "#a67c00",
              "expression" = "white")
+
 
 
 
@@ -45,8 +46,7 @@ my.function <- function(mark) {
   stopifnot(identical(rownames(expression.matrix),
                       rownames(mark.matrix)))
   
-  # 4. get transposed matrix for expression
-  
+
   # 3. retrieve mark's specific significant genes 
   # and intersect with list of expression significant genes
   mark.sig.genes <- read.table(paste0(mark, "/QN.merged/", mark, ".QN.merged.maSigPro.out.tsv"), 
@@ -60,14 +60,28 @@ my.function <- function(mark) {
   expression.mark.sig.genes <- intersect(expression.sig.genes, mark.sig.genes)
   expression.mark.ns.genes <- setdiff(expression.sig.genes, expression.mark.sig.genes)
   
-  # 4. get transposed matrix
+  # 4. filter for genes with peaks
+  ## 4.1. genes w/ peaks
+  mark.genes.peaks <- read.table(paste0(mark, "/QN.merged/all.genes.intersecting.peaks.tsv"),
+                                 h=F, sep="\t", stringsAsFactors = F)
+  mark.genes.peaks <- mark.genes.peaks$V1
+  
+  ## 4.2. filter sig and ns genes
+  expression.mark.sig.genes <- intersect(expression.mark.sig.genes, mark.genes.peaks)
+  expression.mark.ns.genes <- intersect(expression.mark.ns.genes, mark.genes.peaks)
+  
+  print(mark)
+  print(length(expression.mark.sig.genes))
+  print(length(expression.mark.ns.genes))
+  
+  # 5. get transposed matrix
   expression.matrix.f <- as.data.frame(t(expression.matrix))
   expression.matrix.scaled <- as.data.frame(scale(expression.matrix.f))
   
   mark.matrix <- as.data.frame(t(mark.matrix))
   mark.matrix.scaled <- as.data.frame(scale(mark.matrix))
   
-  # 5. PCA with significantly variable
+  # 6. PCA with significantly variable
   # genes for both expression and mark
   stopifnot(identical(colnames(expression.matrix.scaled[, expression.mark.sig.genes]),
                       colnames(mark.matrix.scaled[, expression.mark.sig.genes])))
@@ -88,7 +102,7 @@ my.function <- function(mark) {
   df.pca.mark.sig$tp <- rep(rownames(df.pca.mark.sig)[1:12], 2)
   df.pca.mark.sig$type <- rep(c("expression", mark), each=12)
   df.pca.mark.sig$tp_numeric <- rep(c(0,3,6,9,12,18,24,36,48,72,120,168), 2)
-  df.pca.mark.sig$group <- "significant"
+  df.pca.mark.sig$group <- "differentially marked"
   
   
   lop[[1]] <- ggplot(df.pca.mark.sig, 
@@ -97,16 +111,17 @@ my.function <- function(mark) {
     facet_grid(~group) +
     theme(axis.title = element_text(size=12),
           axis.text = element_text(size=11),
-          panel.border = element_blank(), 
+          panel.border = element_rect(color="black"), 
           panel.grid.major = element_blank(),
           panel.grid.minor = element_blank(), 
           axis.line = element_line(colour = "black"),
           aspect.ratio = 1,
           strip.text.x = element_text(size=13),
+          strip.background.x = element_blank(),
           legend.text = element_text(size=13),
           legend.title = element_text(size=13),
           plot.title = element_blank(),
-          plot.margin = unit(rep(0, 4), "cm")) +
+          plot.margin = unit(rep(0, 4), "cm")) +    
     geom_point(aes(size=tp_numeric), shape=21, alpha=.85) +
     scale_fill_manual(values = palette) +
     coord_equal(ratio=1) +
@@ -115,7 +130,7 @@ my.function <- function(mark) {
     labs(title = mark) +
     guides(fill = F, size=F) 
   
-  # 6. PCA with genes significantly
+  # 7. PCA with genes significantly
   # variable only for expression
   tmp <- as.data.frame(t(na.omit(t(mark.matrix.scaled[, expression.mark.ns.genes]))))
   expression.mark.ns.genes <- colnames(tmp)
@@ -138,7 +153,7 @@ my.function <- function(mark) {
   df.pca.mark.ns$tp <- rep(rownames(df.pca.mark.ns)[1:12], 2)
   df.pca.mark.ns$type <- rep(c("expression", mark), each=12)
   df.pca.mark.ns$tp_numeric <- rep(c(0,3,6,9,12,18,24,36,48,72,120,168), 2)
-  df.pca.mark.ns$group <- "ns"
+  df.pca.mark.ns$group <- "stable marking"
   
   lop[[2]] <- ggplot(df.pca.mark.ns, 
                         aes(x=PC1, y=PC2, fill = type)) +
@@ -146,12 +161,13 @@ my.function <- function(mark) {
     facet_grid(~group) +
     theme(axis.title = element_text(size=12),
           axis.text = element_text(size=11),
-          panel.border = element_blank(), 
+          panel.border = element_rect(color="black"), 
           panel.grid.major = element_blank(),
           panel.grid.minor = element_blank(), 
           axis.line = element_line(colour = "black"),
           aspect.ratio = 1,
           strip.text.x = element_text(size=13),
+          strip.background.x = element_blank(),
           legend.text = element_text(size=13),
           legend.title = element_text(size=13),
           plot.title = element_blank(),
@@ -210,16 +226,12 @@ for (my.mark in marks) {
 }
 
 pdf("~/public_html/Borsari_et_al_transdifferentiation_chromatin/single_figures/fig.1g.pdf",
-    height=18, width=14)
-plot_grid(main.lop[[1]], NULL, main.lop[[2]], 
-          main.lop[[3]], NULL, main.lop[[4]],
-          main.lop[[5]], NULL, main.lop[[6]], 
-          main.lop[[7]], NULL, main.lop[[8]],
-          main.lop[[9]], 
-          nrow=5, ncol=3, align = "hv", 
-          rel_widths = c(1, -0.1, 1,
-                         1, -0.1, 1,
-                         1, -0.1, 1,
-                         1, -0.1, 1,
-                         1))
+    height=11, width=21)
+plot_grid(main.lop[[1]], NULL, main.lop[[2]], NULL, main.lop[[3]], 
+          main.lop[[4]], NULL, main.lop[[5]], NULL, main.lop[[6]], 
+          main.lop[[7]], NULL, main.lop[[8]], NULL, main.lop[[9]], 
+          nrow=3, ncol=5, align = "hv", 
+          rel_widths = c(1, -0.1, 1, -0.1, 1,
+                         1, -0.1, 1, -0.1, 1,
+                         1, -0.1, 1, -0.1, 1))
 dev.off()

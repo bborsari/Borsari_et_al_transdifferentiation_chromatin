@@ -13,12 +13,21 @@ library(ggpubr)
 library(reshape2)
 library(facetscales)
 
-palette <- c("down-\nregulated\n\n(IGLL1)" = "#810f7c", 
-             "bending\n\n(RGS1)" = "#737373",
-             "up-\nregulated\n\n(C1QA)" = "#f16913",
-             "peaking\n\n(RFX8)" = "#c7e9b4",
-             "flat\n\n(ARF5)" = "#1c9099"
+# palette <- c("down-\nregulated\n\n(IGLL1)" = "#810f7c", 
+#              "bending\n\n(RGS1)" = "#737373",
+#              "up-\nregulated\n\n(C1QA)" = "#f16913",
+#              "peaking\n\n(RFX8)" = "#c7e9b4",
+#              "flat\n\n(ARF5)" = "#1c9099"
+# )
+
+
+palette <- c("down-\nregulated\n\n(IGLL1)" = "#2d7f89", 
+             "bending\n\n(RGS1)" = "#7acbd5",
+             "up-\nregulated\n\n(C1QA)" = "#89372d",
+             "peaking\n\n(RFX8)" = "#d5847a",
+             "flat\n\n(ARF5)" = "#8f8f8f"
 )
+
 
 setwd("/no_backup/rg/bborsari/projects/ERC/human/2018-01-19.chip-nf/Borsari_et_al/analysis/all.marks/expression/")
 
@@ -98,10 +107,10 @@ ggplot(genes, aes(x=variable, y=value, group=1, colour=class, fill=class)) +
         axis.title = element_text(size = 15),
         strip.text.y = element_text(size = 15, angle=0),
         strip.background.y = element_blank(),
-        panel.border = element_blank(), 
+        panel.border = element_rect(color="black"), 
         panel.grid.major = element_blank(),
         panel.grid.minor = element_blank(), 
-        axis.line = element_line(colour = "black"),
+        axis.line = element_line(colour = "black")
   ) +
   guides(fill=F, color=F) +
   ylab("log2(TPM + 1)") +

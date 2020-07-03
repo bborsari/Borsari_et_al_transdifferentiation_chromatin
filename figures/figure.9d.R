@@ -187,6 +187,10 @@ for ( i in 1:7 ) {
 }
 
 
+
+
+
+
 # 4. make plots for 75%, 50%, 25%, 0% of downregulation
 pdf("~/public_html/Borsari_et_al_transdifferentiation_chromatin/single_figures/fig.9d.75.pdf", width=8)
 function1(m="X75_perc")

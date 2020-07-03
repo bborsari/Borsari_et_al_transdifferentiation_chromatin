@@ -26,14 +26,17 @@ function1 <- function(mark) {
   df$gene_id <- rownames(df)
   
   df.melt <- melt(df, id.vars = "gene_id")
-  df.melt$value <- factor(df.melt$value, levels = c("delayed", "concomitant", "anticipated"))
+  df.melt$value <- gsub("concomitant", "co-occurrent", df.melt$value)
+  df.melt$value2 <- df.melt$value
+  df.melt$value <- factor(df.melt$value, levels = c("anticipated", "co-occurrent", "delayed"))
+  df.melt$value2 <- factor(df.melt$value2, levels = c("delayed", "co-occurrent", "anticipated"))
   
   print(mark)
   print(table(df.melt[, c("variable", "value")])/ nrow(df))
   
   p <- ggplot(df.melt,
               aes(x = variable, stratum = value, alluvium = gene_id, label = value)) +
-    geom_flow(aes(fill = value), alpha=0.8) +
+    geom_flow(aes(fill = value2), alpha=0.8) +
     geom_stratum(aes(fill = value), alpha=0.8, color="white") +
     theme_bw() + 
     theme(panel.border = element_rect(color="black"),
@@ -70,7 +73,7 @@ setwd("/no_backup/rg/bborsari/projects/ERC/human/2018-01-19.chip-nf/Borsari_et_a
 
 # 2. define palette
 palette <- c("anticipated" = "#bdbdbd",
-             "concomitant" = "#737373",
+             "co-occurrent" = "#737373",
              "delayed" = "#403734")
 
 # 3. the marks we're analyzing

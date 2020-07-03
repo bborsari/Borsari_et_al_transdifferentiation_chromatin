@@ -2,25 +2,38 @@
 
 
 
-palette <- c("H3K9ac" = "#e7298a",
-             "H3K27ac" = "#8e0152",
-             "H3K4me3" = "#f1b6da",
-             "H3K27me3" = "#253494",
-             "H3K9me3" = "#41b6c4",
+# palette <- c("H3K9ac" = "#e7298a",
+#              "H3K27ac" = "#8e0152",
+#              "H3K4me3" = "#f1b6da",
+#              "H3K27me3" = "#253494",
+#              "H3K9me3" = "#41b6c4",
+#              "H3K36me3" = "#7fbc41",
+#              "H4K20me1" = "#276419",
+#              "H3K4me1" = "#ffbf00",
+#              "H3K4me2" = "#a67c00",
+#              "expression" = "white")
+
+
+palette <- c("H3K9ac" = "#af4d85",
+             "H3K27ac" = "#630039",
+             "H3K4me3" = "#d199b9",
+             "H3K27me3" = "#1d2976",
+             "H3K9me3" = "#a7add4",
              "H3K36me3" = "#7fbc41",
-             "H4K20me1" = "#276419",
-             "H3K4me1" = "#ffbf00",
+             "H4K20me1" = "#4c7027",
+             "H3K4me1" = "#e5ab00",
              "H3K4me2" = "#a67c00",
              "expression" = "white")
 
-palette2 <- c("H3K9ac" = "#e7298a",
-             "H3K27ac" = "#8e0152",
-             "H3K4me3" = "#f1b6da",
-             "H3K27me3" = "#253494",
-             "H3K9me3" = "#41b6c4",
+
+palette2 <- c("H3K9ac" = "#af4d85",
+             "H3K27ac" = "#630039",
+             "H3K4me3" = "#d199b9",
+             "H3K27me3" = "#1d2976",
+             "H3K9me3" = "#a7add4",
              "H3K36me3" = "#7fbc41",
-             "H4K20me1" = "#276419",
-             "H3K4me1" = "#ffbf00",
+             "H4K20me1" = "#4c7027",
+             "H3K4me1" = "#e5ab00",
              "H3K4me2" = "#a67c00",
              "expression" = "gray")
 
@@ -203,9 +216,9 @@ df.pca.all.marks.2$type <- factor(df.pca.all.marks.2$type, levels = c("expressio
                                                                       "H3K27ac",
                                                                       "H3K9ac",
                                                                       "H4K20me1",
-                                                                      "H3K36me3",
                                                                       "H3K4me3",
                                                                       "H3K4me1",
+                                                                      "H3K36me3",
                                                                       "H3K4me2",
                                                                       "H3K9me3",
                                                                       "H3K27me3"))
@@ -217,34 +230,6 @@ df.pca.all.marks.2$tp_cat <- rep(1:12, 10)
 
 # 10. PC1 vs PC2
 
-# pdf("~/public_html/paper_ERC/single_figures/fig.1m.pdf", width = 7, height = 7)
-# ggplot(df.pca.all.marks.2,
-#                    aes(x=PC1, y=PC2, fill = type)) +
-#   theme_bw() +
-#   geom_density_2d(colour = "white") +
-#   theme(axis.title = element_text(size =20),
-#         axis.text = element_text(size = 20),
-#         panel.border = element_blank(), panel.grid.major = element_blank(),
-#         panel.grid.minor = element_blank(), axis.line = element_line(colour = "black"),
-#         # aspect.ratio = 1,
-#         legend.text = element_text(size=15),
-#         legend.title = element_text(size=15),
-#         plot.title = element_text(size=20, hjust =.5),
-#         plot.margin = unit(c(0, 0, 0, 0), "cm")) +
-#   geom_point(data = df.pca.all.marks.2[df.pca.all.marks.2$type %in% c("expression", "H3K27ac", "H3K9ac"), ],
-#              aes(size=tp_numeric), shape=21) +
-#   geom_text()
-#   scale_fill_manual(values = palette) +
-#   coord_equal(ratio=1) +
-#   labs(title="") +
-#   xlab("PC1 (14.5 %)") +
-#   ylab("PC2 (5.0 %)") +
-#   #guides(fill=F, size=F)
-#   guides(fill = guide_legend(override.aes = list(size=10), title = ""),
-#          size = guide_legend(title = "hours"))
-# # dev.off()
-
-
 
 p <- ggplot(df.pca.all.marks.2,
        aes(x=PC1, y=PC2, fill = type, label = tp_numeric, colour=type)) +
@@ -253,10 +238,13 @@ p <- ggplot(df.pca.all.marks.2,
   geom_density_2d(colour="white") + 
   theme(axis.title = element_text(size =13),
         axis.text = element_text(size = 13),
-        panel.border = element_blank(), panel.grid.major = element_blank(),
-        panel.grid.minor = element_blank(), axis.line = element_line(colour = "black"),
+        panel.border = element_rect(color="black"), 
+        panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(), 
+        axis.line = element_line(colour = "black"),
         # aspect.ratio = 1,
-        strip.text.x = element_text(size=13),
+        strip.background.x = element_blank(),
+        strip.text.x = element_text(size=14),
         legend.text = element_text(size=12),
         legend.title = element_text(size=12),
         legend.position = "bottom",

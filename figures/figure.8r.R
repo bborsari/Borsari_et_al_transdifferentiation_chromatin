@@ -100,5 +100,6 @@ ggplot(x, aes(x = mark, y=H000, fill=mark)) +
         axis.line = element_blank(),
         legend.title = element_blank()) +
   ylab("expression at 0h - log2 (TPM+1)") +
-  scale_fill_manual(values = palette)
+  scale_fill_manual(values = palette) +
+  ylim(0, 12)
 dev.off()

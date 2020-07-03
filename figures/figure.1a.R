@@ -1,7 +1,7 @@
 .libPaths("/nfs/users2/rg/bborsari/software/R-3.5.2/library")
 
 
-# plots of the distribution of avg and max expression for the 7 categories
+# plots of the distribution of avg and max expression for the 5 categories
 
 #************
 # LIBRARIES *
@@ -16,11 +16,11 @@ setwd("/no_backup/rg/bborsari/projects/ERC/human/2018-01-19.chip-nf/Borsari_et_a
 
 
 
-palette <- c("down-\nregulated" = "#810f7c", 
-             "bending" = "#737373",
-             "up-\nregulated" = "#f16913",
-             "peaking" = "#c7e9b4",
-             "flat" = "#1c9099")
+palette <- c("down-\nregulated" = "#2d7f89", 
+             "bending" = "#7acbd5",
+             "up-\nregulated" = "#89372d",
+             "peaking" = "#d5847a",
+             "flat" = "#8f8f8f")
 
 
 #********
@@ -43,6 +43,7 @@ stable.genes.metadata <- data.frame(class = rep("flat", length(stable.genes)),
                                     time_point = rep(NA, length(stable.genes)),
                                     hc = rep(NA, length(stable.genes)),
                                     class2 = rep(NA, length(stable.genes)),
+                                    final_class = rep(NA, length(stable.genes)),
                                     class3 = rep(NA, length(stable.genes)),
                                     class4 = rep("flat", length(stable.genes)))
 rownames(stable.genes.metadata) <- stable.genes
@@ -92,15 +93,15 @@ all.genes.lop[[1]] <- ggplot(all.genes.exp.df, aes(x=class, y=max_exp, fill=clas
 
 
 all.genes.lop <- lapply(all.genes.lop, function(x){x <- x + 
-  geom_violin(alpha=.4, colour="white") +
-  geom_boxplot(width=0.3, alpha = .6, outlier.shape = NA) +
+  geom_violin(alpha=.5, colour="black") +
+  geom_boxplot(width=0.3, alpha = .7, outlier.shape = NA) +
   theme_bw() +
   theme(axis.title.x = element_blank(),
         axis.title.y = element_text(size=15),
         axis.text.x = element_text(size=15),
         axis.text.y = element_text(size=15),
         strip.text.x = element_text(size=15),
-        panel.border = element_blank(), 
+        panel.border = element_rect(color="black"), 
         panel.grid.major = element_blank(),
         panel.grid.minor = element_blank(), 
         axis.line = element_line(colour = "black")) +

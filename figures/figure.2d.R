@@ -4,11 +4,11 @@ setwd("/no_backup/rg/bborsari/projects/ERC/human/2018-01-19.chip-nf/Borsari_et_a
 
 
 
-palette <- c("down-\nregulated" = "#810f7c", 
-             "bending" = "#737373",
-             "up-\nregulated" = "#f16913",
-             "peaking" = "#c7e9b4",
-             "flat" = "#1c9099")
+palette <- c("down-\nregulated" = "#2d7f89", 
+             "bending" = "#7acbd5",
+             "up-\nregulated" = "#89372d",
+             "peaking" = "#d5847a",
+             "flat" = "#8f8f8f")
 
 
 #************
@@ -75,6 +75,7 @@ stable.genes.metadata <- data.frame(class = rep("flat", length(stable.genes)),
                                     time_point = rep(NA, length(stable.genes)),
                                     hc = rep(NA, length(stable.genes)),
                                     class2 = rep(NA, length(stable.genes)),
+                                    final_class = rep(NA, length(stable.genes)),
                                     class3 = rep(NA, length(stable.genes)),
                                     class4 = rep("flat", length(stable.genes)))
 rownames(stable.genes.metadata) <- stable.genes
@@ -142,20 +143,28 @@ all.marks$class4 <- factor(all.marks$class4,
 
 pdf("~/public_html/Borsari_et_al_transdifferentiation_chromatin/single_figures/fig.2d.pdf", width=18, height=7)
 ggplot(all.marks, aes(x = cc, y = class4, fill = class4, vline_color = ..quantile.. )) + 
-  geom_density_ridges(alpha = .6, quantile_lines = TRUE, quantiles = 2) +
+  geom_density_ridges(alpha = .6, quantile_lines = TRUE, quantiles = 2, scale = .9) +
+  scale_y_discrete(expand = expand_scale(mult = c(0, 0))) +
   theme_ridges() + 
   theme(legend.position = "bottom",
         legend.title = element_blank(),
-        legend.text = element_text(size = 20),
+        legend.text = element_text(size = 16),
         axis.title.y = element_blank(),
         axis.title.x = element_text(size = 20, hjust = .5),
         axis.text.y = element_blank(),
         axis.text.x = element_text(size=16, angle = 30, vjust = .5),
-        strip.text.x = element_text(size=16))  +
+        axis.ticks.x = element_line(color="black"),
+        strip.text.x = element_text(size=18),
+        strip.background.x = element_blank(),
+        panel.border = element_rect(color="black"), 
+        panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(), 
+        axis.line = element_line(colour = "black"))  +
   scale_fill_manual(values = palette) +
   facet_grid(~mark) +
   scale_x_continuous(breaks = c(-1, -0.5, 0, 0.5, 1)) +
   scale_discrete_manual("vline_color", values =c("black", "white")) +
   guides(vline_color = F) +
+  geom_vline(xintercept = 0, color = "black", linetype = "dashed") +
   xlab("Pearson's R")
 dev.off()

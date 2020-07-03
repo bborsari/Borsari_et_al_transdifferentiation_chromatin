@@ -10,16 +10,17 @@ library(ggplot2)
 library(gridExtra)
 library(dplyr)
 library(tidyr)
+library(xtable)
 
 
-palette <- c("H3K9ac" = "#e7298a",
-             "H3K27ac" = "#8e0152",
-             "H3K4me3" = "#f1b6da",
-             "H3K27me3" = "#253494",
-             "H3K9me3" = "#41b6c4",
+palette <- c("H3K9ac" = "#af4d85",
+             "H3K27ac" = "#630039",
+             "H3K4me3" = "#d199b9",
+             "H3K27me3" = "#1d2976",
+             "H3K9me3" = "#a7add4",
              "H3K36me3" = "#7fbc41",
-             "H4K20me1" = "#276419",
-             "H3K4me1" = "#ffbf00",
+             "H4K20me1" = "#4c7027",
+             "H3K4me1" = "#e5ab00",
              "H3K4me2" = "#a67c00",
              "expression" = "white")
 
@@ -376,11 +377,11 @@ ggplot(fdr.all.marks, aes(y=-log10(fdr), x=type, fill=type)) +
         axis.title.y = element_text(size=15),
         axis.text.y = element_text(size=15),
         axis.text.x = element_text(size=15, angle=30, vjust=.5),
-        panel.border = element_blank(), 
+        panel.border = element_rect(color="black"), 
         panel.grid.major = element_blank(),
         panel.grid.minor = element_blank(), 
         axis.line = element_line(colour = "black")) +
-  ylab("-log10(fdr) - shapiro-wilk test") +
+  ylab("-log10(FDR) - shapiro-wilk test") +
   scale_fill_manual(values = palette) +
   guides(fill=F)
 dev.off()
@@ -407,4 +408,5 @@ colnames(fdr.table.all.marks) <- c("normal profile", "not normal profile")
 
 pdf("~/public_html/Borsari_et_al_transdifferentiation_chromatin/single_figures/QN.merged.FDR.table.pdf")
 grid.table(fdr.table.all.marks)
+# xtable(fdr.table.all.marks)
 dev.off()
