@@ -1,0 +1,63 @@
+#*****
+# 1. prepare folder to store
+# results of permutations
+# mkdir out.permutations
+#*****
+
+#*****
+# 2. perform permutations of 
+# NW alignments (job array)
+# qsub /no_backup/rg/bborsari/projects/ERC/human/2018-01-19.chip-nf/Borsari_et_al/bin/NW.alignment.permutations.job.array.sh --input H3K4me3.NW.input.matrix.tsv --outFolder out.permutations
+#*****
+
+#*****
+# 3. compute p-values of NW
+# alignments for all 8030 genes 
+cat out.permutations/*.data | grep -v score | sed '1iscore\tpermutations' | /no_backup/rg/bborsari/projects/ERC/human/2018-01-19.chip-nf/Borsari_et_al/bin/NW.pvalue.permutation.test.py -i stdin > H3K4me3.pvalue.table.all.genes.tsv &&
+#*****
+
+#*****
+# 4. compress out.permutations folder
+tar -zcvf out.permutations.tar.gz out.permutations &&
+# rm -r out.permutations &&
+#*****
+
+#*****
+# 5. reconstruct NW alignment paths
+# & find best bidirectional matches
+# for all set of genes
+~/software/R-3.5.2/bin/Rscript /no_backup/rg/bborsari/projects/ERC/human/2018-01-19.chip-nf/Borsari_et_al/bin/NW.alignment.path.R -i H3K4me3.NW.input.matrix.tsv -o stdout --t1 12 --t2 12 | /no_backup/rg/bborsari/projects/ERC/human/2018-01-19.chip-nf/Borsari_et_al/bin/NW.bidirectional.matches.py -i stdin > H3K4me3.match.table.all.genes.tsv &&
+#*****
+
+#*****
+# 6. compute FDR on all 8030 genes
+if [[ -e up.left.tsv ]]
+then	
+   	/no_backup/rg/bborsari/projects/ERC/human/2018-01-19.chip-nf/Borsari_et_al/bin/selectMatrixRows.sh <(/no_backup/rg/bborsari/projects/ERC/human/2018-01-19.chip-nf/Borsari_et_al/bin/discardRows.sh <(cut -f1 up.left.tsv | sort -u) <(cut -f1 H3K4me3.pvalue.table.all.genes.tsv)) H3K4me3.pvalue.table.all.genes.tsv |\
+   	~/software/R-3.5.2/bin/Rscript /no_backup/rg/bborsari/projects/ERC/human/2018-01-19.chip-nf/Borsari_et_al/bin/p-adjust.R -i stdin -o H3K4me3.FDR.table.all.genes.tsv -c 2 -m fdr
+else
+	~/software/R-3.5.2/bin/Rscript /no_backup/rg/bborsari/projects/ERC/human/2018-01-19.chip-nf/Borsari_et_al/bin/p-adjust.R -i H3K4me3.pvalue.table.all.genes.tsv -o H3K4me3.FDR.table.all.genes.tsv -c 2 -m fdr
+fi &&
+#*****
+
+#*****
+# 7. match table of only 
+# significant alignments (FDR < 0.05)
+/no_backup/rg/bborsari/projects/ERC/human/2018-01-19.chip-nf/Borsari_et_al/bin/selectRows.sh <(awk 'NR>1 && $4<0.05{print $1}' H3K4me3.FDR.table.all.genes.tsv) H3K4me3.match.table.all.genes.tsv | sed '1igene_id\texpression_time_point\tmark_time_point\tdistance\tstep-type' > H3K4me3.match.table.tsv &&
+#*****
+
+#*****
+# 8. check that for each gene 
+# and for each expression time point, 
+# there is no more than 
+# one insertion w/o a match
+if [[ $( tail -n+2 H3K4me3.match.table.tsv | \
+   	awk '{print $1"_"$2"\t"$5}' | \
+   	/no_backup/rg/bborsari/projects/ERC/human/2018-01-19.chip-nf/Borsari_et_al/bin/make.column.dictionary.py -i stdin | \
+   	sed 's/;/\t/g;s/insert://g;s/match://g' | \
+   	awk 'BEGIN{n=0} $2>1 && $3==0 {n++} END{print n}' ) -gt 0 ]]
+then
+   	echo "More than 1 insertion w/o match"
+    	exit 1	
+fi
+#*****

@@ -59,3 +59,22 @@ for mark in H3K4me3 H3K9ac H3K27ac H3K4me1 H3K4me2 H3K27me3 H3K36me3 H3K9me3 H4K
 # variable only for the mark (silent genes only)
 for mark in H3K4me3 H3K9ac H3K27ac H3K4me1 H3K4me2 H3K27me3 H3K36me3 H3K9me3 H4K20me1; do a=$(grep -Ff <(cut -d "." -f1 expression/silent.genes.txt) <(tail -n+2 "$mark"/QN.merged/"$mark".QN.merged.maSigPro.out.tsv | cut -f1 | cut -d "." -f1) | wc -l); b=$(echo "$a / 1552" | bc -l); echo -e "$mark\t$a\t$b"; done | sed '1imark\tn_genes\tpercentage' > percentage.significant.genes.only.mark.silent.tsv
 #******
+
+#******
+# 10. number of silent genes for expression that are:
+# w/o peak of the mark (no_peak),
+# have peak and are variable,
+# have peak and are flat (no significant changes for maSigPro)
+cat marks.txt | while read mark; do a=$(grep -Fv -f "$mark"/QN.merged/all.genes.intersecting.peaks.tsv expression/silent.genes.txt | wc -l); b=$(grep -Ff <(grep -Ff expression/silent.genes.txt "$mark"/QN.merged/all.genes.intersecting.peaks.tsv) "$mark"/QN.merged/"$mark".QN.merged.maSigPro.out.tsv | wc -l); c=$(grep -Fv -f <(cut -d "." -f1 "$mark"/QN.merged/"$mark".QN.merged.maSigPro.out.tsv) <(grep -Ff expression/silent.genes.txt "$mark"/QN.merged/all.genes.intersecting.peaks.tsv) | wc -l); echo -e "$mark\t$a\t$b\t$c"; done > silent.genes.no_peak.variable.stable.tsv
+#******
+
+#******
+# 11. number of flat genes for expression that are:
+# w/o peak of the mark (no_peak),
+# have peak and are variable,
+# have peak and are flat (no significant changes for maSigPro)
+flat_genes="/users/rg/bborsari/public_html/Borsari_et_al_transdifferentiation_chromatin/genes/flat.genes.expression/flat.genes.txt"
+cat marks.txt | while read mark; do a=$(grep -Fv -f "$mark"/QN.merged/all.genes.intersecting.peaks.tsv $flat_genes | wc -l); b=$(grep -Ff <(grep -Ff $flat_genes "$mark"/QN.merged/all.genes.intersecting.peaks.tsv) "$mark"/QN.merged/"$mark".QN.merged.maSigPro.out.tsv | wc -l); c=$(grep -Fv -f <(cut -d "." -f1 "$mark"/QN.merged/"$mark".QN.merged.maSigPro.out.tsv) <(grep -Ff $flat_genes "$mark"/QN.merged/all.genes.intersecting.peaks.tsv) | wc -l); echo -e "$mark\t$a\t$b\t$c"; done > flat.genes.no_peak.variable.stable.tsv
+#******
+
+tail -n+2 expression/QN.merged/expression.QN.merged.maSigPro.out.tsv | cut -f1 > variable.genes.expression.txt
