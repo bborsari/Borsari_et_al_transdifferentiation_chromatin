@@ -6,6 +6,7 @@
 #************
 
 library(gridExtra)
+library(xtable)
 
 setwd("/no_backup/rg/bborsari/projects/ERC/human/2018-01-19.chip-nf/Borsari_et_al/analysis/all.marks")
 
@@ -25,3 +26,4 @@ pdf("~/public_html/Borsari_et_al_transdifferentiation_chromatin/single_figures/t
 grid.table(m, rows = NULL)
 dev.off()
 
+print(xtable(m, caption = "variable genes"), include.rownames=FALSE)

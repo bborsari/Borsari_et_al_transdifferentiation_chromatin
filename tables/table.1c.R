@@ -25,3 +25,4 @@ pdf("~/public_html/Borsari_et_al_transdifferentiation_chromatin/single_figures/t
 grid.table(m, rows = NULL)
 dev.off()
 
+print(xtable(m, caption = "silent genes (n = 1552)"), include.rownames=FALSE)
