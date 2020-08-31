@@ -10,7 +10,7 @@ non.redundant.TSS.sh	non-redundant TSSs per gene (needed to build ChIP-seq matri
 add_header.sh	dependency for get.matrix.chipseq.sh	ChIP-seq data processing and analysis
 selectColumns.sh	dependency for get.matrix.chipseq.sh	ChIP-seq data processing and analysis
 get.matrix.chipseq.sh	build ChIP-seq matrices	ChIP-seq data processing and analysis
-HMM.wrapper.marks.R	wrapper to build multivariate HMM	multivariate HMM
+HMM.wrapper.marks.R	wrapper to build multivariate HMM	Multivariate Hidden Markov Model
 loess.polynomial.regression.R	polynomial regression prior to NW	Decision-tree classification
 NW.generate.input.matrix.sh	prepare z-score input matrices for NW	Decision-tree classification
 NW.alignment.permutations.R	100,000-permutations NW scheme	Decision-tree classification
