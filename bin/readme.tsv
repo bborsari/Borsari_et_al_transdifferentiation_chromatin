@@ -1,0 +1,35 @@
+Script	Task	Method details subsection
+quantile.normalization.R	quantile normalization 	RNA-seq data processing and analysis; ChIP-seq data processing and analysis
+matrix_matrix_mean.R	average expression level / chromatin signal between replicates	RNA-seq data processing and analysis; ChIP-seq data processing and analysis
+maSigPro.wrapper.R	significant differences in time course data	RNA-seq data processing and analysis; ChIP-seq data processing and analysis
+classification_LOG2.pl	classification of gene expression profiles (up-regulated, down-regulated, peaking, bending)	RNA-seq data processing and analysis
+classification2.R	classification of gene expression profiles (up-regulated, down-regulated, peaking, bending)	RNA-seq data processing and analysis
+bwtool.aggregate.ChIPseq.sh	wrapper for bwtool aggregate (aggregation plots)	ChIP-seq data processing and analysis
+classify-exons.sh	dependency for non.redundant.TSS.sh	ChIP-seq data processing and analysis
+non.redundant.TSS.sh	non-redundant TSSs per gene (needed to build ChIP-seq matrices)	ChIP-seq data processing and analysis
+add_header.sh	dependency for get.matrix.chipseq.sh	ChIP-seq data processing and analysis
+selectColumns.sh	dependency for get.matrix.chipseq.sh	ChIP-seq data processing and analysis
+get.matrix.chipseq.sh	build ChIP-seq matrices	ChIP-seq data processing and analysis
+HMM.wrapper.marks.R	wrapper to build multivariate HMM	multivariate HMM
+loess.polynomial.regression.R	polynomial regression prior to NW	Decision-tree classification
+NW.generate.input.matrix.sh	prepare z-score input matrices for NW	Decision-tree classification
+NW.alignment.permutations.R	100,000-permutations NW scheme	Decision-tree classification
+NW.alignment.permutations.job.array.sh	cluster job array wrapper for NW.alignment.permutations.R	Decision-tree classification
+NW.pvalue.permutation.test.py	NW alignment p-value calculation	Decision-tree classification
+NW.alignment.path.R	NW alignment reconstruction	Decision-tree classification
+NW.bidirectional.matches.py	NW allignment reconstruction	Decision-tree classification
+define.6.groups.R	decision-tree classification	Decision-tree classification
+download.metadata.sh	download ENCODE ChIP-seq data	Analysis of ENCODE ChIP-seq and RNA-seq data
+parse.metadata.audit.categories.py	dependency for retrieve.encode.identifiers.sh	Analysis of ENCODE ChIP-seq and RNA-seq data
+retrieve.encode.identifiers.sh	parse ENCODE metadata	Analysis of ENCODE ChIP-seq and RNA-seq data
+parse.list.identifiers.sh	parse ENCODE metadata	Analysis of ENCODE ChIP-seq and RNA-seq data
+intersect.peaks.regions.sh	intersect promoter regions with peaks	Analysis of ENCODE ChIP-seq and RNA-seq data
+rescale.R	rescale expression and chromatin time-series profiles to range 0-100	Analysis of temporal dynamics
+join.py	general use	
+list.options.py	general use	
+selectMatrixRows.sh	general use	
+selectRows.sh	general use	
+discardRows.sh	general use	
+selectColumns.sh	general use	
+make.column.dictionary.py	general use	
+make.column.list.py	general use	
