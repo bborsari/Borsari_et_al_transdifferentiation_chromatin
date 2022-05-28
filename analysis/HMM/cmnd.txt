@@ -1,7 +1,9 @@
-for n in {2..10}; do ~/software/R-3.5.2/bin/Rscript bin/# for j in {2..20}; do ~bborsari/software/R-3.6.3/bin/Rscript /no_backup/rg/bborsari/projects/ERC/human/2018-01-19.chip-nf/Borsari_et_al/bin/HMM.wrapper.marks.expression.R -s "$j" -o marks.expression -e T; done
-# for j in {2..20}; do ~bborsari/software/R-3.6.3/bin/Rscript /no_backup/rg/bborsari/projects/ERC/human/2018-01-19.chip-nf/Borsari_et_al/bin/HMM.wrapper.marks.expression.R -s "$j" -o weird -e F; done
+# for j in {2..20}; do ~bborsari/software/R-3.6.3/bin/Rscript /no_backup/rg/bborsari/projects/ERC/human/2018-01-19.chip-nf/Borsari_et_al/bin/HMM.wrapper.marks.expression.R -s "$j" -o marks.expression -e T; done
+
 # for j in {2..20}; do ~bborsari/software/R-3.6.3/bin/Rscript /no_backup/rg/bborsari/projects/ERC/human/2018-01-19.chip-nf/Borsari_et_al/bin/HMM.wrapper.marks.R -s "$j" -o marks; done
+
 # grep converged logs/HMM.marks.expression | awk '{print $7}' > log.lik.HMM.marks.expression
+
 # grep converged logs/HMM.marks | awk '{print $7}' > log.lik.HMM.marks
 
 
@@ -19,3 +21,4 @@ for n in {2..10}; do ~/software/R-3.5.2/bin/Rscript bin/heatmap.DE.genes.R -n "$
 for n in {2..10}; do ~/software/R-3.5.2/bin/Rscript bin/heatmap.stablyE.genes.R -n "$n"; done
 for n in {2..10}; do ~/software/R-3.5.2/bin/Rscript bin/heatmap.notE.genes.R -n "$n"; done
 for n in {2..10}; do ~/software/R-3.5.2/bin/Rscript bin/barplot.stable.genes.per.state.R -n "$n"; done
+~/software/R-3.5.2/bin/Rscript bin/heatmap.clusters.R -n 5 -d CHI2
