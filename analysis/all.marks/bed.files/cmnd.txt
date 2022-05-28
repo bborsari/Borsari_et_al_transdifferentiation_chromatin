@@ -9,3 +9,15 @@ grep -Ff <(cat /no_backup/rg/bborsari/projects/ERC/human/2018-01-19.chip-nf/Bors
 # of non-redundant TSSs for selected 12248 genes
 grep -Ff <(cat /no_backup/rg/bborsari/projects/ERC/human/2018-01-19.chip-nf/Borsari_et_al/analysis/all.marks/expression/genes.with.min.5.TPM.txt /no_backup/rg/bborsari/projects/ERC/human/2018-01-19.chip-nf/Borsari_et_al/analysis/all.marks/expression/silent.genes.txt) /no_backup/rg/bborsari/projects/ERC/human/2018-01-19.chip-nf/Borsari_et_al/bed.files/gencode.v24.protein.coding.non.redundant.TSS.2Kb.up.down.bed > non.redundant.TSS.2Kb.up.down.bed
 #******
+
+#******
+# 3. retrieve bed file 
+# 2 Kb upstream 1st TSS --> end gene body
+awk 'BEGIN{FS=OFS="\t"}{if ($6 == "+"){$2=$2-5000} else {$3=$3+5000}; if ($2<0){$2=0}; print $0}' gene.body.bed > 5Kb.up.TSS2end.gene.body.bed
+#******
+
+#******
+# 4. retrieve bedfile with coordinates
+# of non-redundant TSSs for selected 12248 genes (+- 5 Kb, used for cEBPa)
+grep -Ff <(cat /no_backup/rg/bborsari/projects/ERC/human/2018-01-19.chip-nf/Borsari_et_al/analysis/all.marks/expression/genes.with.min.5.TPM.txt /no_backup/rg/bborsari/projects/ERC/human/2018-01-19.chip-nf/Borsari_et_al/analysis/all.marks/expression/silent.genes.txt) /no_backup/rg/bborsari/projects/ERC/human/2018-01-19.chip-nf/Borsari_et_al/bed.files/gencode.v24.protein.coding.non.redundant.TSS.5Kb.up.down.bed > non.redundant.TSS.5Kb.up.down.bed
+#******

@@ -2,49 +2,49 @@
 # 1. re-scale matrices in scale 0-100%
 
 # 1.1. expression
-~/software/R-3.5.2/bin/Rscript /no_backup/rg/bborsari/projects/ERC/human/2018-01-19.chip-nf/Borsari_et_al/bin/rescale.R -i ../expression.matrix.tsv -o expression.matrix.rescaled.tsv &&
+# ~/software/R-3.5.2/bin/Rscript /no_backup/rg/bborsari/projects/ERC/human/2018-01-19.chip-nf/Borsari_et_al/bin/rescale.R -i ../expression.matrix.tsv -o expression.matrix.rescaled.tsv &&
 
 # 1.2. mark
-~/software/R-3.5.2/bin/Rscript /no_backup/rg/bborsari/projects/ERC/human/2018-01-19.chip-nf/Borsari_et_al/bin/rescale.R -i ../H4K20me1.matrix.tsv -o H4K20me1.matrix.rescaled.tsv &&
+# ~/software/R-3.5.2/bin/Rscript /no_backup/rg/bborsari/projects/ERC/human/2018-01-19.chip-nf/Borsari_et_al/bin/rescale.R -i ../H4K20me1.matrix.tsv -o H4K20me1.matrix.rescaled.tsv &&
 #******
 
 #******
 # 2. prepare folders to store results
-mkdir increases decreases &&
+# mkdir increases decreases &&
 #******
 
 #******
 # 3. retrieve time-point of 
 # 25%, 50%, 75%, 100% of up-regulation
-for x in expression H4K20me1; do
- 	for y in 0.25 0.50 0.75 1; do
- 		awk -v y="$y" 'BEGIN{FS=OFS="\t"}NR>1{for (i=3; i<=NF; i++){if ($i >= y && $(i-1) < y){print $1, (i-1); break}}}' "$x".matrix.rescaled.tsv > increases/"$x"."$y".increases.tsv
- 	done
-done &&
+# for x in expression H4K20me1; do
+#  	for y in 0.25 0.50 0.75 1; do
+#  		awk -v y="$y" 'BEGIN{FS=OFS="\t"}NR>1{for (i=3; i<=NF; i++){if ($i >= y && $(i-1) < y){print $1, (i-1); break}}}' "$x".matrix.rescaled.tsv > increases/"$x"."$y".increases.tsv
+#  	done
+# done &&
 #******
 
 #******
 # 4. merge results across different time-points
-for x in expression H4K20me1; do
- 	cp increases/"$x".0.25.increases.tsv increases/"$x".25.50.75.100.tsv
- 	for y in 0.50 0.75 1; do
- 		/no_backup/rg/bborsari/projects/ERC/human/2018-01-19.chip-nf/Borsari_et_al/bin/join.py -b increases/"$x".25.50.75.100.tsv -a increases/"$x"."$y".increases.tsv > tmp
- 		mv tmp increases/"$x".25.50.75.100.tsv
- 	done
- 	sed '1i25_perc\t50_perc\t75_perc\t100_perc' increases/"$x".25.50.75.100.tsv > tmp;
- 	mv tmp increases/"$x".25.50.75.100.tsv
-done &&
+# for x in expression H4K20me1; do
+#  	cp increases/"$x".0.25.increases.tsv increases/"$x".25.50.75.100.tsv
+#  	for y in 0.50 0.75 1; do
+#  		/no_backup/rg/bborsari/projects/ERC/human/2018-01-19.chip-nf/Borsari_et_al/bin/join.py -b increases/"$x".25.50.75.100.tsv -a increases/"$x"."$y".increases.tsv > tmp
+#  		mv tmp increases/"$x".25.50.75.100.tsv
+#  	done
+#  	sed '1i25_perc\t50_perc\t75_perc\t100_perc' increases/"$x".25.50.75.100.tsv > tmp;
+#  	mv tmp increases/"$x".25.50.75.100.tsv
+# done &&
 #******
 
 #******
-# 5. select upregulated & positively_correlated genes
-grep -F upregulation ../H4K20me1.6.groups.tsv | grep -F positive | cut -f1 > increases/upregulation.positively_correlated.genes.txt &&
+# 5. select upregulated genes
+# grep -F upregulation ../H4K20me1.6.groups.tsv | cut -f1 > increases/upregulation.genes.txt &&
 #******
 
 #******
 # 6. retrieve joint table of expression and H4K20me1 
-# for upregulated & positively_correlated genes
-grep -Ff increases/upregulation.positively_correlated.genes.txt <(/no_backup/rg/bborsari/projects/ERC/human/2018-01-19.chip-nf/Borsari_et_al/bin/join.py -b increases/expression.25.50.75.100.tsv -a increases/H4K20me1.25.50.75.100.tsv) | sed '1ie_25\te_50\te_75\te_100\tm_25\tm_50\tm_75\tm_100' > increases/expression.H4K20me1.dynamics.tsv &&
+# for upregulated genes
+# grep -Ff increases/upregulation.genes.txt <(/no_backup/rg/bborsari/projects/ERC/human/2018-01-19.chip-nf/Borsari_et_al/bin/join.py -b increases/expression.25.50.75.100.tsv -a increases/H4K20me1.25.50.75.100.tsv) | sed '1ie_25\te_50\te_75\te_100\tm_25\tm_50\tm_75\tm_100' > increases/expression.H4K20me1.dynamics.tsv &&
 #******
 
 #******
@@ -52,41 +52,41 @@ grep -Ff increases/upregulation.positively_correlated.genes.txt <(/no_backup/rg/
 # define groups of genes with changes
 # in chromatin anticipated, concomitant or delayed
 # with respect to expression
-awk 'BEGIN{FS=OFS="\t"}{if (NR==1) {print $0, "group_25", "group_50", "group_75", "group_100"} else {vector = ""; for (i=2;i<=5;i++){if ($i < $(i+4)) {vector= vector";delayed"} else if ($i > $(i+4)) {vector = vector";anticipated"} else {vector = vector";concomitant"}}; split(vector, a, ";"); print $0, a[2], a[3], a[4], a[5]}}' increases/expression.H4K20me1.dynamics.tsv > increases/tmp; mv increases/tmp increases/expression.H4K20me1.dynamics.tsv &&
+# awk 'BEGIN{FS=OFS="\t"}{if (NR==1) {print $0, "group_25", "group_50", "group_75", "group_100"} else {vector = ""; for (i=2;i<=5;i++){if ($i < $(i+4)) {vector= vector";delayed"} else if ($i > $(i+4)) {vector = vector";anticipated"} else {vector = vector";concomitant"}}; split(vector, a, ";"); print $0, a[2], a[3], a[4], a[5]}}' increases/expression.H4K20me1.dynamics.tsv > increases/tmp; mv increases/tmp increases/expression.H4K20me1.dynamics.tsv &&
 #******
 
 #******
 # 8. retrieve time-point of 
 # 75%, 50%, 25%, 0% of down-regulation
-for x in expression H4K20me1; do
- 	for y in 0.75 0.50 0.25 0; do
- 		awk -v y="$y" 'BEGIN{FS=OFS="\t"}NR>1{for (i=3; i<=NF; i++){if ($i <= y && $(i-1) > y){print $1, (i-1); break}}}' "$x".matrix.rescaled.tsv > decreases/"$x"."$y".decreases.tsv
- 	done
-done &&
+# for x in expression H4K20me1; do
+#  	for y in 0.75 0.50 0.25 0; do
+#  		awk -v y="$y" 'BEGIN{FS=OFS="\t"}NR>1{for (i=3; i<=NF; i++){if ($i <= y && $(i-1) > y){print $1, (i-1); break}}}' "$x".matrix.rescaled.tsv > decreases/"$x"."$y".decreases.tsv
+#  	done
+# done &&
 #******
 
 #******
 # 9. merge results across different time-points
-for x in expression H4K20me1; do
- 	cp decreases/"$x".0.75.decreases.tsv decreases/"$x".75.50.25.0.tsv
- 	for y in 0.50 0.25 0; do
- 		/no_backup/rg/bborsari/projects/ERC/human/2018-01-19.chip-nf/Borsari_et_al/bin/join.py -b decreases/"$x".75.50.25.0.tsv -a decreases/"$x"."$y".decreases.tsv > tmp
- 		mv tmp decreases/"$x".75.50.25.0.tsv
- 	done
- 	sed '1i75_perc\t50_perc\t25_perc\t0_perc' decreases/"$x".75.50.25.0.tsv > tmp;
- 	mv tmp decreases/"$x".75.50.25.0.tsv
-done &&
+# for x in expression H4K20me1; do
+#  	cp decreases/"$x".0.75.decreases.tsv decreases/"$x".75.50.25.0.tsv
+#  	for y in 0.50 0.25 0; do
+#  		/no_backup/rg/bborsari/projects/ERC/human/2018-01-19.chip-nf/Borsari_et_al/bin/join.py -b decreases/"$x".75.50.25.0.tsv -a decreases/"$x"."$y".decreases.tsv > tmp
+#  		mv tmp decreases/"$x".75.50.25.0.tsv
+#  	done
+#  	sed '1i75_perc\t50_perc\t25_perc\t0_perc' decreases/"$x".75.50.25.0.tsv > tmp;
+#  	mv tmp decreases/"$x".75.50.25.0.tsv
+# done &&
 #******
 
 #******
-# 10. select downregulated & positively_correlated
-grep -F downregulation ../H4K20me1.6.groups.tsv | grep -F positive | cut -f1 > decreases/downregulation.positively_correlated.genes.txt
+# 10. select downregulated genes
+# grep -F downregulation ../H4K20me1.6.groups.tsv | cut -f1 > decreases/downregulation.genes.txt
 #******
 
 #******
 # 11. retrieve joint table of expression and H4K20me1 
-# for downregulated & positively_correlated genes
-grep -Ff decreases/downregulation.positively_correlated.genes.txt <(/no_backup/rg/bborsari/projects/ERC/human/2018-01-19.chip-nf/Borsari_et_al/bin/join.py -b decreases/expression.75.50.25.0.tsv -a decreases/H4K20me1.75.50.25.0.tsv) | sed '1ie_75\te_50\te_25\te_0\tm_75\tm_50\tm_25\tm_0' > decreases/expression.H4K20me1.dynamics.tsv &&
+# for downregulated genes
+# grep -Ff decreases/downregulation.genes.txt <(/no_backup/rg/bborsari/projects/ERC/human/2018-01-19.chip-nf/Borsari_et_al/bin/join.py -b decreases/expression.75.50.25.0.tsv -a decreases/H4K20me1.75.50.25.0.tsv) | sed '1ie_75\te_50\te_25\te_0\tm_75\tm_50\tm_25\tm_0' > decreases/expression.H4K20me1.dynamics.tsv &&
 #******
 
 #******
@@ -94,5 +94,12 @@ grep -Ff decreases/downregulation.positively_correlated.genes.txt <(/no_backup/r
 # define groups of genes with changes
 # in chromatin anticipated, concomitant or delayed
 # with respect to expression
-awk 'BEGIN{FS=OFS="\t"}{if (NR==1) {print $0, "group_75", "group_50", "group_25", "group_0"} else {vector = ""; for (i=2;i<=5;i++){if ($i < $(i+4)) {vector= vector";delayed"} else if ($i > $(i+4)) {vector = vector";anticipated"} else {vector = vector";concomitant"}}; split(vector, a, ";"); print $0, a[2], a[3], a[4], a[5]}}' decreases/expression.H4K20me1.dynamics.tsv > decreases/tmp; mv decreases/tmp decreases/expression.H4K20me1.dynamics.tsv
+# awk 'BEGIN{FS=OFS="\t"}{if (NR==1) {print $0, "group_75", "group_50", "group_25", "group_0"} else {vector = ""; for (i=2;i<=5;i++){if ($i < $(i+4)) {vector= vector";delayed"} else if ($i > $(i+4)) {vector = vector";anticipated"} else {vector = vector";concomitant"}}; split(vector, a, ";"); print $0, a[2], a[3], a[4], a[5]}}' decreases/expression.H4K20me1.dynamics.tsv > decreases/tmp; mv decreases/tmp decreases/expression.H4K20me1.dynamics.tsv
+#******
+
+#******
+# 13. get peaks dynamics
+conda activate ERC_human &&
+myBed="/no_backup/rg/bborsari/projects/ERC/human/2018-01-19.chip-nf/Borsari_et_al/analysis/all.marks/bed.files/non.redundant.TSS.2Kb.up.down.bed" &&
+cat ../../H4K20me1.Zerone.peaks.txt | while read file; do bedtools intersect -a $myBed -b $file | awk -v file=$(basename $file) '{split(file, a, "H4K20me1"); print $0"\t"a[1]}' | cut -f7-8 | sort -u; done | ~/bin/make.column.list.py > H4K20me1.peaks.dynamics.tsv
 #******
